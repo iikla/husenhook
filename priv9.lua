@@ -1796,7 +1796,7 @@
                         });
                         
                         library:create("UIGradient", {
-                            Rotation = 180;
+                            Rotation = 270;
                             Parent = hue_drag;
                             Color = rgbseq{rgbkey(0, rgb(255, 0, 0)), rgbkey(0.17, rgb(255, 0, 255)), rgbkey(0.33, rgb(0, 0, 255)), rgbkey(0.5, rgb(0, 255, 255)), rgbkey(0.67, rgb(0, 255, 0)), rgbkey(0.83, rgb(255, 255, 0)), rgbkey(1, rgb(255, 0, 0))}
                         });
