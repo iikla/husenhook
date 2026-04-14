@@ -606,6 +606,9 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                 end
 
                 objects[ "healthbar_holder" ].Parent = flags[ "Healthbar" ] and objects[ "holder" ] or esp.cache
+                if flags["Healthbar"] and path.info and path.info.humanoid then
+                    path.health_changed(path.info.humanoid.Health)
+                end
                 print("6")
                 objects[ "weapon" ].TextColor3 = flags["Weapon_Color"].Color
                 objects[ "weapon" ].Parent = flags["Weapon"] and v.Character:FindFirstChildOfClass("Tool") and objects[ "holder" ] or esp.cache
@@ -648,33 +651,45 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                 end 
 
                 -- Skeletons 
-                    if flags["Skeletons"] and character:FindFirstChild("UpperTorso") then 
-                        for i = 1, #bones do
-                            local origin, destination = bones[i][1], bones[i][2]
-
-                            if not data.drawings[i] then 
-                                continue  
-                            end 
-
-                            local path = data.drawings[i]
-
-                            local origin_3d = character:FindFirstChild(origin) 
-                            local destination_3d = character:FindFirstChild(destination) 
-
-                            if origin_3d and destination_3d then 
-                                local origin_2d, on_screen_start = esp:get_screen_pos(origin_3d.Position)
-                                local destination_2d, on_screen_end = esp:get_screen_pos(destination_3d.Position)
-                                
-                                if on_screen_start and on_screen_end then 
-                                    path.Visible = true
-                                    path.From = Vector2.new(origin_2d.X, origin_2d.Y)
-                                    path.To = Vector2.new(destination_2d.X, destination_2d.Y)
-                                else
-                                    path.Visible = false
-                                end 
-                            end
-                        end 
+                local show_skeletons = flags["Skeletons"] and character:FindFirstChild("UpperTorso")
+                
+                for i = 1, #bones do
+                    local path = data.drawings[i]
+                    if not path then 
+                        continue  
                     end 
+
+                    if show_skeletons then
+                        local origin, destination = bones[i][1], bones[i][2]
+
+                        local origin_3d = character:FindFirstChild(origin) 
+                        local destination_3d = character:FindFirstChild(destination) 
+
+                        if origin_3d and destination_3d then 
+                            local origin_2d, on_screen_start = esp:get_screen_pos(origin_3d.Position)
+                            local destination_2d, on_screen_end = esp:get_screen_pos(destination_3d.Position)
+                            
+                            if on_screen_start and on_screen_end then 
+                                if not path.Visible then
+                                    path.Visible = true
+                                end
+                                
+                                local from = vec2(origin_2d.X, origin_2d.Y)
+                                local to = vec2(destination_2d.X, destination_2d.Y)
+                                
+                                if path.From ~= from then path.From = from end
+                                if path.To ~= to then path.To = to end
+                                
+                                continue -- Successfully rendered this bone, move to next
+                            end 
+                        end
+                    end 
+                    
+                    -- If any condition above failed, or drawing shouldn't be shown, conceal it safely
+                    if path.Visible then
+                        path.Visible = false
+                    end
+                end 
                 -- 
 
                 if not on_screen then
