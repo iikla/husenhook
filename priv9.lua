@@ -1729,7 +1729,7 @@
                             Position = dim2(0.6888179183006287, 0, 0.24751244485378265, 0);
                             BorderColor3 = rgb(0, 0, 0);
                             Visible = false;
-                            Size = dim2(0, 150, 0, 150);
+                            Size = dim2(0, 150, 0, 170);
                             BorderSizePixel = 0;
                             BackgroundColor3 = themes.preset[tostring(self.count)]
                         });	library:apply_theme(colorpicker, tostring(self.count), "BackgroundColor3")
@@ -1763,7 +1763,7 @@
                         
                         local textbox_holder = library:create("Frame", {
                             Parent = e;
-                            Position = dim2(0, 0, 1, -36);
+                            Position = dim2(0, 0, 1, -56);
                             BorderColor3 = rgb(0, 0, 0);
                             Size = dim2(1, -1, 0, 16);
                             BorderSizePixel = 0;
@@ -1787,6 +1787,32 @@
                             BackgroundColor3 = themes.preset.inline
                         }); library:apply_theme(textbox, "inline", "BackgroundColor3")
                         
+                        local hex_textbox_holder = library:create("Frame", {
+                            Parent = e;
+                            Position = dim2(0, 0, 1, -36);
+                            BorderColor3 = rgb(0, 0, 0);
+                            Size = dim2(1, -1, 0, 16);
+                            BorderSizePixel = 0;
+                            BackgroundColor3 = themes.preset[tostring(self.count)]
+                        }); library:apply_theme(hex_textbox_holder, tostring(self.count), "BackgroundColor3")
+                        
+                        local hex_textbox = library:create("TextBox", {
+                            FontFace = fonts["ProggyClean"];
+                            TextColor3 = rgb(255, 255, 255);
+                            BorderColor3 = rgb(0, 0, 0);
+                            Text = "";
+                            Parent = hex_textbox_holder;
+                            BackgroundTransparency = 0;
+                            ClearTextOnFocus = false;
+                            PlaceholderColor3 = rgb(255, 255, 255);
+                            Size = dim2(1, -2, 1, -2);
+                            Position = dim2(0, 1, 0, 1);
+                            BorderSizePixel = 0;
+                            TextSize = 12;
+                            TextXAlignment = Enum.TextXAlignment.Center;
+                            BackgroundColor3 = themes.preset.inline
+                        }); library:apply_theme(hex_textbox, "inline", "BackgroundColor3")
+                        
                         local hue_button = library:create("TextButton", {
                             AnchorPoint = vec2(1, 0);
                             Text = "";
@@ -1794,7 +1820,7 @@
                             Parent = e;
                             Position = dim2(1, -1, 0, 0);
                             BorderColor3 = rgb(0, 0, 0);
-                            Size = dim2(0, 14, 1, -60);
+                            Size = dim2(0, 14, 1, -80);
                             BorderSizePixel = 0;
                             BackgroundColor3 = themes.preset.inline
                         }); library:apply_theme(hue_button, "inline", "BackgroundColor3")
@@ -1828,7 +1854,7 @@
                             Text = "";
                             AutoButtonColor = false;
                             Parent = e;
-                            Position = dim2(0, 0, 1, -48);
+                            Position = dim2(0, 0, 1, -68);
                             BorderColor3 = rgb(0, 0, 0);
                             Size = dim2(1, -1, 0, 14);
                             BorderSizePixel = 0;
@@ -1989,6 +2015,8 @@
                         textbox.Text = string.format("%s, %s, %s, ", library:round(color.R * 255), library:round(color.G * 255), library:round(color.B * 255))
                         textbox.Text ..= library:round(1 - a, 0.01)
                         
+                        hex_textbox.Text = string.format("#%02X%02X%02X", library:round(color.R * 255), library:round(color.G * 255), library:round(color.B * 255))
+                        
                         cfg.callback(Color, a)
                     end
         
@@ -2056,8 +2084,20 @@
                         local r, g, b, a = library:convert(textbox.Text)
                         
                         if r and g and b and a then 
-                            cfg.set(rgb(r, g, b), 1 - a)
+                            cfg.set(Color3.fromRGB(r, g, b), 1 - a)
                         end 
+                    end)
+                    
+                    hex_textbox.FocusLost:Connect(function()
+                        local hex = hex_textbox.Text:gsub("#", "")
+                        if #hex == 6 then
+                            local r = tonumber(hex:sub(1, 2), 16)
+                            local g = tonumber(hex:sub(3, 4), 16)
+                            local b = tonumber(hex:sub(5, 6), 16)
+                            if r and g and b then
+                                cfg.set(Color3.fromRGB(r, g, b), nil)
+                            end
+                        end
                     end)
                 -- 
 
