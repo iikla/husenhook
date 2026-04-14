@@ -38,25 +38,23 @@ local bones = {
     {"RightUpperLeg", "RightLowerLeg"},
 }
 
-local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cache = Instance.new("ScreenGui", gethui()), connections = {}}
-esp.flags = {
-    ["Enabled"] = true,
-    ["Names"] = true, 
-    ["Name_Color"] = { Color = rgb(255, 255, 255) },
-    ["Boxes"] = true,
-    ["Box_Type"] = "Normal",
-    ["Box_Color"] = { Color = rgb(255, 255, 255) },
-    ["Healthbar"] = true, 
-    ["Health_High"] = { Color = rgb(0, 255, 0) },
-    ["Health_Low"] = { Color = rgb(255, 0, 0) },
-    ["Distance"] = true,
-    ["Weapon"] = true,
-    ["Skeletons"] = true,
-    ["Skeletons_Color"] = { Color = rgb(255, 255, 255) },
-    ["Distance_Color"] = { Color = rgb(255, 255, 255) },
+local flags = { -- basically a substitute for ur ui flags (flags["wahdiuawdhwa"])
+    ["Enabled"] = false;
+    ["Names"] = false; 
+    ["Name_Color"] = { Color = rgb(255, 255, 255) };
+    ["Boxes"] = true;
+    ["Box_Type"] = "Corner";
+    ["Box_Color"] = { Color = rgb(255, 255, 255) };
+    ["Healthbar"] = true; 
+    ["Health_High"] = { Color = rgb(0, 255, 0) };
+    ["Health_Low"] = { Color = rgb(255, 0, 0) };
+    ["Distance"] = true;
+    ["Weapon"] = true;
+    ["Skeletons"] = true;
+    ["Skeletons_Color"] = { Color = rgb(255, 255, 255) };
+    ["Distance_Color"] = { Color = rgb(255, 255, 255) };
     ["Weapon_Color"] = { Color = rgb(255, 255, 255) }
 }
-local flags = esp.flags
 
 local fonts = {}; do
     function Register_Font(Name, Weight, Style, Asset)
@@ -94,7 +92,7 @@ local fonts = {}; do
     }
 end
 
-do
+local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cache = Instance.new("ScreenGui", gethui()), connections = {}}; do 
     esp.screengui.IgnoreGuiInset = true
     esp.screengui.Name = "\0"
 
@@ -169,14 +167,14 @@ do
                 });
                 
                 objects[ "box_outline" ] = esp:create( "UIStroke" , {
-                    Parent = (flags["ESP_Boxes"] and flags["ESP_Box_Type"] ~= "Corner" and objects["holder"]) or esp.cache;
+                    Parent = (flags["Boxes"] and flags["Box_Type"] ~= "Corner" and objects["holder"]) or esp.cache;
                     LineJoinMode = Enum.LineJoinMode.Miter
                 });
                 
                 objects[ "name" ] = esp:create( "TextLabel" , {
                     FontFace = fonts.main;
                     Parent = objects[ "holder" ];
-                    TextColor3 = flags["ESP_Name_Color"].Color;
+                    TextColor3 = flags["Name_Color"].Color;
                     BorderColor3 = rgb(0, 0, 0);
                     Text = string.format("%s (@%s)", player.DisplayName, player.Name);
                     Name = "\0";
@@ -191,7 +189,7 @@ do
                 });
                 
                 objects[ "box_handler" ] = esp:create( "Frame" , {
-                    Parent = (flags["ESP_Boxes"] and flags["ESP_Box_Type"] ~= "Corner" and objects["holder"]) or esp.cache;
+                    Parent = (flags["Boxes"] and flags["Box_Type"] ~= "Corner" and objects["holder"]) or esp.cache;
                     Name = "\0";
                     BackgroundTransparency = 1;
                     Position = dim2(0, 1, 0, 1);
@@ -228,7 +226,7 @@ do
                     objects[ "corners" ] = esp:create( "Frame" , {
                         Visible = true;
                         BorderColor3 = rgb(0, 0, 0);
-                        Parent = flags["ESP_Boxes"] and flags["ESP_Box_Type"] == "Corner" and objects["holder"] or esp.cache;
+                        Parent = flags["Boxes"] and flags["Box_Type"] == "Corner" and objects["holder"] or esp.cache;
                         BackgroundTransparency = 1;
                         Position = dim2(0, -1, 0, 2);
                         Name = "\0";
@@ -253,7 +251,7 @@ do
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, -2);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = flags["ESP_Box_Color"].Color
+                        BackgroundColor3 = flags["Box_Color"].Color
                     });
                     
                     objects[ "2" ] = esp:create( "Frame" , {
@@ -272,7 +270,7 @@ do
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, 1);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = flags["ESP_Box_Color"].Color
+                        BackgroundColor3 = flags["Box_Color"].Color
                     });
                     
                     objects[ "3" ] = esp:create( "Frame" , {
@@ -292,7 +290,7 @@ do
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, -2);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = flags["ESP_Box_Color"].Color
+                        BackgroundColor3 = flags["Box_Color"].Color
                     });
                     
                     objects[ "4" ] = esp:create( "Frame" , {
@@ -312,7 +310,7 @@ do
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, 1);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = flags["ESP_Box_Color"].Color
+                        BackgroundColor3 = flags["Box_Color"].Color
                     });
                     
                     objects[ "5" ] = esp:create( "Frame" , {
@@ -332,7 +330,7 @@ do
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, -2);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = flags["ESP_Box_Color"].Color
+                        BackgroundColor3 = flags["Box_Color"].Color
                     });
                     
                     objects[ "6" ] = esp:create( "Frame" , {
@@ -353,7 +351,7 @@ do
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, 1);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = flags["ESP_Box_Color"].Color
+                        BackgroundColor3 = flags["Box_Color"].Color
                     });
                     
                     objects[ "7" ] = esp:create( "Frame" , {
@@ -373,7 +371,7 @@ do
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, -2);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = flags["ESP_Box_Color"].Color
+                        BackgroundColor3 = flags["Box_Color"].Color
                     });
                     
                     objects[ "7" ] = esp:create( "Frame" , {
@@ -394,14 +392,14 @@ do
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -2, 1, 1);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = flags["ESP_Box_Color"].Color
+                        BackgroundColor3 = flags["Box_Color"].Color
                     });
                 -- 
                 
                 -- Healthbar
                     objects[ "healthbar_holder" ] = esp:create( "Frame" , {
                         AnchorPoint = vec2(1, 0);
-                        Parent = flags["ESP_Healthbar"] and objects[ "holder" ] or esp.cache;
+                        Parent = flags["Healthbar"] and objects[ "holder" ] or esp.cache;
                         Name = "\0";
                         Position = dim2(0, -5, 0, -1);
                         BorderColor3 = rgb(0, 0, 0);
@@ -424,10 +422,10 @@ do
                 -- Distance esp
                     objects[ "distance" ] = esp:create( "TextLabel" , {
                         FontFace = fonts.main;
-                        TextColor3 = flags["ESP_Distance_Color"].Color;
+                        TextColor3 = flags["Distance_Color"].Color;
                         BorderColor3 = rgb(0, 0, 0);
                         Text = "127st";
-                        Parent = flags["ESP_Distance"] and objects[ "holder" ] or esp.cache;
+                        Parent = flags[ "Distance" ] and objects[ "holder" ] or esp.cache;
                         TextStrokeTransparency = 0;
                         Name = "\0";
                         Size = dim2(1, 0, 0, 0);
@@ -442,7 +440,7 @@ do
                 -- Weapon esp
                     objects[ "weapon" ] = esp:create( "TextLabel" , {
                         FontFace = fonts.main;
-                        TextColor3 = flags["ESP_Weapon_Color"].Color;
+                        TextColor3 = flags["Weapon_Color"].Color;
                         BorderColor3 = rgb(0, 0, 0);
                         Text = "[ak-47]";
                         Parent = esp.cache;
@@ -461,7 +459,7 @@ do
                     
                     for _, bone in bones do
                         local line = Drawing.new("Line")
-                        line.Color = flags["ESP_Skeletons_Color"].Color;
+                        line.Color = flags["Skeletons_Color"].Color;
                         line.Thickness = 1;
                         line.Visible = false;
 
@@ -472,7 +470,7 @@ do
             
             do --[[ data functions ]]
                 data.health_changed = function( value )
-                    if not flags["ESP_Healthbar"] then 
+                    if not flags[ "Healthbar" ] then 
                         return 
                     end
 
@@ -480,7 +478,7 @@ do
                     local humanoid = data.info.humanoid
                     
                     local multiplier = value / humanoid.MaxHealth
-                    local color = flags["ESP_Health_Low"].Color:Lerp( flags["ESP_Health_High"].Color, multiplier )
+                    local color = flags[ "Health_Low" ].Color:Lerp( flags["Health_High"].Color, multiplier )
                     
                     objects[ "healthbar" ].Size = UDim2.new(1, -2, multiplier, -2)
                     objects[ "healthbar" ].Position = UDim2.new(0, 1, 1 - multiplier, 1)
@@ -578,14 +576,14 @@ do
                     continue 
                 end
                 print("3")
-                objects.holder.Parent = flags["ESP_Enabled"] and esp.screengui or esp.cache
+                objects.holder.Parent = flags["Enabled"] and esp.screengui or esp.cache
 
-                objects[ "name" ].Parent = flags["ESP_Names"] and objects["holder"] or esp.cache
-                objects[ "name" ].TextColor3 = flags["ESP_Name_Color"].Color
+                objects[ "name" ].Parent = flags["Names"] and objects["holder"] or esp.cache
+                objects[ "name" ].TextColor3 = flags["Name_Color"].Color
                 
-                local is_corner = flags["ESP_Box_Type"] == "Corner"
+                local is_corner = flags[ "Box_Type" ] == "Corner"
 
-                if flags["ESP_Boxes"] then 
+                if flags["Boxes"] then 
                     objects[ "corners" ].Parent = (is_corner and objects["holder"]) or esp.cache
                     objects[ "box_handler" ].Parent = (is_corner and esp.cache or objects[ "holder" ])
                     objects[ "box_outline" ].Parent = (is_corner and esp.cache or objects[ "holder" ]) 
@@ -595,30 +593,30 @@ do
                     objects[ "box_outline" ].Parent = esp.cache
                 end 
                 print("4")
-                objects[ "box_color" ].Color = flags["ESP_Box_Color"].Color 
+                objects[ "box_color" ].Color = flags["Box_Color"].Color 
 
                 for _, corner in objects[ "corners" ]:GetChildren() do
-                    corner.Frame.BackgroundColor3 = flags["ESP_Box_Color"].Color
+                    corner.Frame.BackgroundColor3 = flags["Box_Color"].Color
                 end
                 print("5")
 
                 for _, line in path.drawings do
-                    line.Color = flags["ESP_Skeletons_Color"].Color
-                    line.Visible = flags["ESP_Skeletons"]
+                    line.Color = flags["Skeletons_Color"].Color
+                    line.Visible = flags["Skeletons"]
                 end
 
-                objects[ "healthbar_holder" ].Parent = flags["ESP_Healthbar"] and objects[ "holder" ] or esp.cache
+                objects[ "healthbar_holder" ].Parent = flags[ "Healthbar" ] and objects[ "holder" ] or esp.cache
                 print("6")
-                objects[ "weapon" ].TextColor3 = flags["ESP_Weapon_Color"].Color
-                objects[ "weapon" ].Parent = flags["ESP_Weapon"] and v.Character:FindFirstChildOfClass("Tool") and objects[ "holder" ] or esp.cache
+                objects[ "weapon" ].TextColor3 = flags["Weapon_Color"].Color
+                objects[ "weapon" ].Parent = flags["Weapon"] and v.Character:FindFirstChildOfClass("Tool") and objects[ "holder" ] or esp.cache
 
-                objects[ "distance" ].TextColor3 = flags["ESP_Distance_Color"].Color
-                objects[ "distance" ].Parent = flags["ESP_Distance"] and objects[ "holder" ] or esp.cache
+                objects[ "distance" ].TextColor3 = flags["Distance_Color"].Color
+                objects[ "distance" ].Parent = flags["Distance"] and objects[ "holder" ] or esp.cache
             end
         end
 
         esp.connection = run.RenderStepped:Connect(function()
-            if not flags["ESP_Enabled"] then 
+            if not flags["Enabled"] then 
                 return
             end
 
@@ -650,7 +648,7 @@ do
                 end 
 
                 -- Skeletons 
-                    if flags["ESP_Skeletons"] and character:FindFirstChild("UpperTorso") then 
+                    if flags["Skeletons"] and character:FindFirstChild("UpperTorso") then 
                         for i = 1, #bones do
                             local origin, destination = bones[i][1], bones[i][2]
 
@@ -718,25 +716,25 @@ do
     -- 
 end
 
-function esp:Create()
-    for _,v in players:GetPlayers() do 
-        if v ~= players.LocalPlayer then 
-            self:create_object(v)
-        end 
+-- Load existing players
+for _,v in players:GetPlayers() do 
+    if v ~= players.LocalPlayer then 
+        esp:create_object(v)
     end 
+end 
 
-    self.player_added = players.PlayerAdded:Connect(function(v)
-        self:create_object(v)
-    end)
+esp.player_added = players.PlayerAdded:Connect(function(v)
+    esp:create_object(v)
+end)
 
-    self.player_removed = players.PlayerRemoving:Connect(function(v)
-        self:remove_object(v)
-    end)
+esp.player_removed = players.PlayerRemoving:Connect(function(v)
+    esp:remove_object(v)
+end)
 
-    task.wait()
-    if self.refresh_elements then
-        self.refresh_elements()
-    end
-end
+task.wait()
+esp.refresh_elements()
 
-return esp
+return {
+    flags = flags,
+    refresh_elements = function() esp.refresh_elements() end
+}
