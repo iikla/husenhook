@@ -41,6 +41,7 @@ local bones = {
 local flags = { -- basically a substitute for ur ui flags (flags["wahdiuawdhwa"])
     ["Enabled"] = false;
     ["Names"] = false; 
+    ["Name_Type"] = "Both"; 
     ["Name_Color"] = { Color = rgb(255, 255, 255) };
     ["Boxes"] = true;
     ["Box_Type"] = "Corner";
@@ -580,6 +581,20 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 
                 objects[ "name" ].Parent = flags["Names"] and objects["holder"] or esp.cache
                 objects[ "name" ].TextColor3 = flags["Name_Color"].Color
+                
+                local name_type = flags["Name_Type"] or "Both"
+                local name_text = ""
+                if name_type == "Username" then
+                    name_text = v.Name
+                elseif name_type == "Display Name" then
+                    name_text = v.DisplayName
+                else
+                    name_text = string.format("%s (@%s)", v.DisplayName, v.Name)
+                end
+                
+                if objects["name"].Text ~= name_text then
+                    objects["name"].Text = name_text
+                end
                 
                 local is_corner = flags[ "Box_Type" ] == "Corner"
 
