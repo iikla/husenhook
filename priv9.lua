@@ -1854,7 +1854,7 @@
                             Text = "";
                             AutoButtonColor = false;
                             Parent = e;
-                            Position = dim2(0, 0, 1, -68);
+                            Position = dim2(0, 0, 1, -66);
                             BorderColor3 = rgb(0, 0, 0);
                             Size = dim2(1, -1, 0, 14);
                             BorderSizePixel = 0;
@@ -1895,11 +1895,11 @@
                             Position = dim2(0, -1, 0, -1);
                             BackgroundColor3 = rgb(255, 255, 255)
                         });
-                        
+
                         local saturation_value_button = library:create("TextButton", {
                             Parent = e;
                             BorderColor3 = rgb(0, 0, 0);
-                            Size = dim2(1, -20, 1, -60);
+                            Size = dim2(1, -20, 1, -80);
                             Text = "";
                             AutoButtonColor = false;
                             BorderSizePixel = 0;
@@ -2076,10 +2076,8 @@
                     end)
                     
                     saturation_button.MouseButton1Down:Connect(function()
-                        print("hiu")
                         dragging_sat = true  
                     end)
-                    
                     textbox.FocusLost:Connect(function()
                         local r, g, b, a = library:convert(textbox.Text)
                         
