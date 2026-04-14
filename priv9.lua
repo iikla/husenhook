@@ -1081,6 +1081,15 @@
                             BackgroundColor3 = themes.preset[tostring(self.count)]
                         }); library:apply_theme(fill, tostring(self.count), "BackgroundColor3");                
 
+                        local right_components = library:create("Frame", {
+                            Parent = toggle;
+                            AnchorPoint = vec2(1, 0);
+                            Position = dim2(1, -20, 0, 0);
+                            Size = dim2(0, 100, 1, 0);
+                            BackgroundTransparency = 1;
+                            BorderSizePixel = 0;
+                        }); cfg.right_components = right_components
+
                         library:create("UIListLayout", {
                             FillDirection = Enum.FillDirection.Horizontal;
                             HorizontalAlignment = Enum.HorizontalAlignment.Right;
@@ -1662,21 +1671,23 @@
 
                 -- Instances
                     -- Element
+                        local is_inline = self.right_components ~= nil
+
                         local colorpicker_element = library:create("TextButton", {
-                            Parent = self.elements;
+                            Parent = self.right_components or self.elements;
                             BackgroundTransparency = 1;
                             Text = "";
                             AutoButtonColor = false;
                             BorderColor3 = rgb(0, 0, 0);
-                            Size = dim2(1, 0, 0, 12);
+                            Size = is_inline and dim2(0, 30, 0, 12) or dim2(1, 0, 0, 12);
                             BorderSizePixel = 0;
                             BackgroundColor3 = rgb(255, 255, 255)
                         });
                         
                         local accent = library:create("Frame", {
-                            AnchorPoint = vec2(1, 0);
+                            AnchorPoint = is_inline and vec2(0, 0) or vec2(1, 0);
                             Parent = colorpicker_element;
-                            Position = dim2(1, 0, 0, 0);
+                            Position = is_inline and dim2(0, 0, 0, 0) or dim2(1, 0, 0, 0);
                             BorderColor3 = rgb(0, 0, 0);
                             Size = dim2(0, 30, 0, 12);
                             BorderSizePixel = 0;
@@ -1692,21 +1703,23 @@
                             BackgroundColor3 = rgb(255, 255, 255)
                         });
                         
-                        library:create("TextLabel", {
-                            FontFace = fonts["ProggyClean"];
-                            TextColor3 = rgb(255, 255, 255);
-                            BorderColor3 = rgb(0, 0, 0);
-                            Text = cfg.name;
-                            Parent = colorpicker_element;
-                            Size = dim2(1, 0, 1, 0);
-                            Position = dim2(0, 1, 0, 0);
-                            BackgroundTransparency = 1;
-                            TextXAlignment = Enum.TextXAlignment.Left;
-                            BorderSizePixel = 0;
-                            AutomaticSize = Enum.AutomaticSize.X;
-                            TextSize = 12;
-                            BackgroundColor3 = rgb(255, 255, 255)
-                        });
+                        if not is_inline then
+                            library:create("TextLabel", {
+                                FontFace = fonts["ProggyClean"];
+                                TextColor3 = rgb(255, 255, 255);
+                                BorderColor3 = rgb(0, 0, 0);
+                                Text = cfg.name;
+                                Parent = colorpicker_element;
+                                Size = dim2(1, 0, 1, 0);
+                                Position = dim2(0, 1, 0, 0);
+                                BackgroundTransparency = 1;
+                                TextXAlignment = Enum.TextXAlignment.Left;
+                                BorderSizePixel = 0;
+                                AutomaticSize = Enum.AutomaticSize.X;
+                                TextSize = 12;
+                                BackgroundColor3 = rgb(255, 255, 255)
+                            });
+                        end
                         
                     -- 
                     
