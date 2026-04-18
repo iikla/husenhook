@@ -1,7 +1,7 @@
 local Config = {
-	Enabled = true,
-	InstantBullet = true,
-	FOVCircleEnabled = true,
+	Enabled = false,
+	InstantBullet = false,
+	FOVCircleEnabled = false,
 	FOVSize = 90,
 	FOVColor = Color3.fromRGB(255, 255, 255),
 	VisibleCheck = false,
@@ -149,3 +149,5 @@ end))
 for _, Table in filtergc("table", { Keys = { "Fire", "Cleanup" } }) do
 	HookFireTable(Table)
 end
+
+return Config
