@@ -113,7 +113,9 @@ function ESP:Update()
 
         local dist = 0
         if pass then
-            dist = (hrp.Position - Camera.CFrame.Position).Magnitude
+            local localChar = LocalPlayer.Character
+            local localHRP = localChar and localChar:FindFirstChild("HumanoidRootPart")
+            dist = localHRP and (hrp.Position - localHRP.Position).Magnitude or (hrp.Position - Camera.CFrame.Position).Magnitude
             if dist > self.Settings.MaxDistance then pass = false end
         end
 
