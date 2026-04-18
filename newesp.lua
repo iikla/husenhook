@@ -167,22 +167,16 @@ function ESP:Update()
         objs.Arrow.Visible = false
 
         --------------------------------------------------
-        -- Bounding Box Calculation (CSGO-style fixed ratio)
+        -- Bounding Box Calculation (FOV-based scale)
         --------------------------------------------------
-        -- Project head top and feet bottom to get a pixel-accurate height,
-        -- then derive width as a fixed ratio of height (standard CSGO 0.55-0.6)
-        local headTop  = Camera:WorldToViewportPoint(head.Position + V3(0, 0.5, 0))
-        local feetBot  = Camera:WorldToViewportPoint(hrp.Position - V3(0, 3, 0))
-
-        local boxH = abs(feetBot.Y - headTop.Y)
-        local boxW = boxH * 0.55
-
-        -- Center X on head, Y spans from headTop to feetBot
-        local centerX = headTop.X
-        local boxX = floor(centerX - boxW / 2)
-        local boxY = floor(headTop.Y)
-        boxW = floor(boxW)
-        boxH = floor(boxH)
+        local rootPos = Camera:WorldToViewportPoint(hrp.Position)
+        local scale = 1 / (rootPos.Z * math.tan(rad(Camera.FieldOfView * 0.5)) * 2) * 1000
+        local boxW = floor(4.5 * scale)
+        local boxH = floor(6 * scale)
+        local scrX = floor(rootPos.X)
+        local scrY = floor(rootPos.Y)
+        local boxX = floor(scrX - boxW * 0.5)
+        local boxY = floor((scrY - boxH * 0.5) + (0.5 * scale))
 
         local boxPos  = V2(boxX, boxY)
         local boxSize = V2(boxW, boxH)
@@ -285,7 +279,7 @@ function ESP:Update()
         end
 
         if config.Distance.Enabled then
-            objs.Distance.Text  = "[" .. floor(dist / 3 + 0.5) .. "m]"
+            objs.Distance.Text  = "[" .. floor(dist + 0.5) .. " studs]"
             objs.Distance.Font  = self.Settings.TextFont
             objs.Distance.Size  = self.Settings.TextSize
             objs.Distance.Color = config.Distance.Color
