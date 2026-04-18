@@ -1,4 +1,4 @@
-local Config = {
+local Config = getgenv().SilentAimConfig or {
 	Enabled = false,
 	InstantBullet = false,
 	FOVCircleEnabled = false,
