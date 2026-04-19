@@ -2102,7 +2102,120 @@
                 return setmetatable(cfg, library)
             end
 
+            function library:settings(options) 
+                local cfg = {
+                    name = options.name or "Settings", 
+                    flag = options.flag or options.name or "Flag",
+                    open = false, 
+                    count = self.count,
+                    color = self.color,
+                }
+
+                local is_inline = self.right_components ~= nil
+
+                local settings_button = library:create("ImageButton", {
+                    Parent = self.right_components or self.elements;
+                    BackgroundTransparency = 1;
+                    Image = "rbxassetid://14219420094"; 
+                    ScaleType = Enum.ScaleType.Fit;
+                    ImageColor3 = themes.preset.text;
+                    Size = is_inline and dim2(0, 14, 0, 14) or dim2(1, 0, 0, 14);
+                    BorderSizePixel = 0;
+                }); library:apply_theme(settings_button, "text", "ImageColor3")
+                
+                local settings_frame = library:create("Frame", {
+                    Parent = library.gui;
+                    Position = dim2(0, 0, 0, 0); 
+                    BorderColor3 = rgb(0, 0, 0);
+                    Visible = false;
+                    Size = dim2(0, 140, 0, 180);
+                    BorderSizePixel = 0;
+                    BackgroundColor3 = themes.preset[tostring(self.count)]
+                }); library:apply_theme(settings_frame, tostring(self.count), "BackgroundColor3")
+
+                local a = library:create("Frame", {
+                    Parent = settings_frame;
+                    BorderColor3 = rgb(0, 0, 0);
+                    Size = dim2(1, 0, 1, 0);
+                    BorderSizePixel = 0;
+                    BackgroundColor3 = themes.preset[tostring(self.count)]
+                }); library:apply_theme(a, tostring(self.count), "BackgroundColor3")
+                
+                local e = library:create("Frame", {
+                    Parent = a;
+                    Position = dim2(0, 1, 0, 1);
+                    BorderColor3 = rgb(0, 0, 0);
+                    Size = dim2(1, -2, 1, -2);
+                    BorderSizePixel = 0;
+                    BackgroundColor3 = rgb(0, 0, 0);
+                    BackgroundTransparency = 0.6;
+                    ZIndex = -1
+                }); 
+
+                local elements_container = library:create("ScrollingFrame", {
+                    Parent = e;
+                    Position = dim2(0, 4, 0, 5);
+                    BorderColor3 = rgb(0, 0, 0);
+                    Size = dim2(1, -8, 1, -10);
+                    BackgroundTransparency = 1;
+                    BorderSizePixel = 0;
+                    ScrollBarThickness = 2;
+                    CanvasSize = dim2(0, 0, 0, 0);
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y;
+                }); cfg.elements = elements_container
+
+                library:create("UIListLayout", {
+                    Parent = elements_container;
+                    Padding = dim(0, 6);
+                    SortOrder = Enum.SortOrder.LayoutOrder
+                });
+
+                local UIPadding = library:create("UIPadding", {
+                    Parent = elements_container,
+                    Name = "",
+                    PaddingBottom = dim(0, 7)
+                })
+
+                function cfg.set_visible(bool) 
+                    settings_frame.Visible = bool
+                    if bool then
+                        -- Position offset to float dynamically out to the right of the button
+                        settings_frame.Position = dim_offset(settings_button.AbsolutePosition.X + 25, settings_button.AbsolutePosition.Y - 10)
+                    end
+                end
+
+                settings_button.MouseButton1Click:Connect(function()
+                    cfg.open = not cfg.open 
+                    
+                    if cfg.open then
+                        if library.current_element_open then
+                            library:close_current_element()
+                        end
+                        library.current_element_open = cfg
+                    elseif library.current_element_open == cfg then
+                        library.current_element_open = nil
+                    end
+
+                    cfg.set_visible(cfg.open)            
+                end)
+
+                library:connection(uis.InputEnded, function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        if not (library:mouse_in_frame(settings_button) or library:mouse_in_frame(settings_frame)) then 
+                            cfg.open = false
+                            cfg.set_visible(false)
+                            if library.current_element_open == cfg then
+                                library.current_element_open = nil
+                            end
+                        end
+                    end
+                end)
+
+                return setmetatable(cfg, library)
+            end
+
             function library:textbox(options) 
+
                 local cfg = {
                     name = options.name or "...",
                     placeholder = options.placeholder or options.placeholdertext or options.holder or options.holdertext or "type here...",
