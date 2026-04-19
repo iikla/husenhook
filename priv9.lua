@@ -2125,7 +2125,7 @@
                 local settings_button = library:create("ImageButton", {
                     Parent = settings_wrapper;
                     AnchorPoint = is_inline and vec2(0, 0.5) or vec2(0, 0);
-                    Position = is_inline and dim2(0, -6, 0.5, -1) or dim2(0, 0, 0, 0); 
+                    Position = is_inline and dim2(0, -6, 0.5, -3) or dim2(0, 0, 0, 0); 
                     BackgroundTransparency = 1;
                     Image = "rbxthumb://type=Asset&id=14219420094&w=150&h=150"; 
                     ScaleType = Enum.ScaleType.Fit;
