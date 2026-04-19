@@ -2109,18 +2109,27 @@
                     flag = options.flag or options.name or "Flag",
                     open = false, 
                     count = self.count,
-                    color = self.color,
+                        color = self.color,
                 }
 
                 local is_inline = self.right_components ~= nil
 
-                local settings_button = library:create("ImageButton", {
+                local settings_wrapper = library:create("Frame", {
                     Parent = self.right_components or self.elements;
                     BackgroundTransparency = 1;
-                    Image = "rbxthumb://type=Asset&id=14219420094&w=150&h=150";
+                    Size = is_inline and dim2(0, 16, 0, 12) or dim2(1, 0, 0, 14);
+                    BorderSizePixel = 0;
+                });
+                
+                local settings_button = library:create("ImageButton", {
+                    Parent = settings_wrapper;
+                    AnchorPoint = is_inline and vec2(0, 0.5) or vec2(0, 0);
+                    Position = is_inline and dim2(0, -4, 0.5, -1) or dim2(0, 0, 0, 0); 
+                    BackgroundTransparency = 1;
+                    Image = "rbxthumb://type=Asset&id=14219420094&w=150&h=150"; 
                     ScaleType = Enum.ScaleType.Fit;
                     ImageColor3 = themes.preset.text;
-                    Size = is_inline and dim2(0, 14, 0, 14) or dim2(1, 0, 0, 14);
+                    Size = is_inline and dim2(0, 12, 0, 12) or dim2(1, 0, 1, 0);
                     BorderSizePixel = 0;
                 }); library:apply_theme(settings_button, "text", "ImageColor3")
                 
