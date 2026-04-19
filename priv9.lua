@@ -98,7 +98,8 @@
                 BackgroundColor3 = {} 	
             },
             text = {
-                TextColor3 = {}	
+                TextColor3 = {},
+                ImageColor3 = {}
             },
             text_outline = {
                 Color = {} 	
