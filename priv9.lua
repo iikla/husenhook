@@ -2124,9 +2124,9 @@
                 
                 local settings_button = library:create("ImageButton", {
                     Parent = settings_wrapper;
-                    Position = dim2(0, 0, 0, -1);
+                    Position = dim2(0, 0, 0, 0);
                     BackgroundTransparency = 1;
-                    Image = "rbxthumb://type=Asset&id=14219420094&w=150&h=150"; 
+                    Image = "rbxthumb://type=Asset&id=13530838879&w=150&h=150"; 
                     ScaleType = Enum.ScaleType.Fit;
                     ImageColor3 = themes.preset.text;
                     Size = dim2(1, 0, 1, 0);
