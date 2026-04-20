@@ -2288,7 +2288,7 @@
                     -- Hardcode targeting to the center of the chest (Y=1.5 relative to HRP at 0)
                     -- This prevents erratic bounding boxes from giant hats/accessories ruining the centering.
                     local center = Vector3.new(0, 1.5, 0)
-                    local dist = 11
+                    local dist = 8.5
                     return CFrame.lookAt(
                         center + Vector3.new(0, 0, -dist),
                         center
