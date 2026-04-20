@@ -2285,52 +2285,60 @@
                     viewport_frame.BorderSizePixel = 0
                     viewport_frame.BackgroundColor3 = rgb(15, 15, 15)
                     viewport_frame.BackgroundTransparency = 0
-                    viewport_frame.Ambient = rgb(200, 200, 200)
+                    viewport_frame.Ambient = rgb(150, 150, 150)
                     viewport_frame.LightColor = rgb(255, 255, 255)
-                    viewport_frame.LightDirection = vec3(-1, -1, -1)
+                    viewport_frame.LightDirection = vec3(1, -1, 0.5)
                     cfg.viewport_frame = viewport_frame
 
-                    local world_model = Instance.new("WorldModel")
-                    world_model.Parent = viewport_frame
-                    cfg.world_model = world_model
-
                     local viewport_camera = Instance.new("Camera")
-                    viewport_camera.FieldOfView = 50
+                    viewport_camera.FieldOfView = 70
                     viewport_camera.Parent = viewport_frame
                     viewport_frame.CurrentCamera = viewport_camera
                     cfg._camera = viewport_camera
 
-                    if cfg.Object then
+                    local function prepare_object(source)
                         local obj
                         if cfg.Clone then
-                            local wasArchivable = cfg.Object.Archivable
-                            cfg.Object.Archivable = true
-                            obj = cfg.Object:Clone()
-                            cfg.Object.Archivable = wasArchivable
+                            local wasArchivable = source.Archivable
+                            source.Archivable = true
+                            obj = source:Clone()
+                            source.Archivable = wasArchivable
                         else
-                            obj = cfg.Object
+                            obj = source
                         end
 
-                        -- Reposition to origin so camera can see it
+                        -- Destroy Humanoid (causes ViewportFrame rendering issues)
+                        local humanoid = obj:FindFirstChildWhichIsA("Humanoid")
+                        if humanoid then humanoid:Destroy() end
+
+                        -- Destroy scripts
+                        for _, desc in obj:GetDescendants() do
+                            if desc:IsA("BaseScript") then
+                                desc:Destroy()
+                            end
+                        end
+
+                        -- Anchor all parts and move to origin
+                        for _, desc in obj:GetDescendants() do
+                            if desc:IsA("BasePart") then
+                                desc.Anchored = true
+                            end
+                        end
+
                         if obj:IsA("Model") then
-                            local hrp = obj:FindFirstChild("HumanoidRootPart") or obj.PrimaryPart
-                            if hrp then
-                                obj:PivotTo(CFrame.new(0, 3, 0))
-                                hrp.Anchored = true
-                            end
-                            -- Strip scripts to prevent issues
-                            for _, desc in obj:GetDescendants() do
-                                if desc:IsA("BaseScript") or desc:IsA("LocalScript") then
-                                    desc:Destroy()
-                                end
-                            end
+                            local pivot = obj:GetPivot()
+                            obj:PivotTo(CFrame.new(0, 0, 0))
                         elseif obj:IsA("BasePart") then
                             obj.CFrame = CFrame.new(0, 0, 0)
                             obj.Anchored = true
                         end
 
-                        obj.Parent = world_model
-                        cfg._object = obj
+                        obj.Parent = viewport_frame
+                        return obj
+                    end
+
+                    if cfg.Object then
+                        cfg._object = prepare_object(cfg.Object)
                     end
                 --
 
@@ -2350,8 +2358,8 @@
                         end
 
                         local maxDim = math.max(size.X, size.Y, size.Z)
-                        local dist = maxDim * 2
-                        local camPos = center.Position + vec3(dist * 0.7, dist * 0.3, dist * 0.7)
+                        local dist = maxDim * 1.5
+                        local camPos = center.Position + vec3(dist, dist * 0.5, dist)
                         self._camera.CFrame = CFrame.lookAt(camPos, center.Position)
                     end
 
@@ -2359,9 +2367,7 @@
                         if self._object then
                             self._object:Destroy()
                         end
-                        local obj = self.Clone and object:Clone() or object
-                        obj.Parent = world_model
-                        self._object = obj
+                        self._object = prepare_object(object)
                         if self.AutoFocus then
                             self:Focus()
                         end
