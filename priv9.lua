@@ -2257,7 +2257,7 @@
                 vpf.Parent = container
 
                 local cam = Instance.new("Camera")
-                cam.FieldOfView = 30
+                cam.FieldOfView = 45
                 cam.Parent = vpf
                 vpf.CurrentCamera = cam
 
@@ -2326,10 +2326,9 @@
                     clone.Parent = vpf
                     current_clone = clone
 
-                    -- Set camera in front of character
                     cam.CFrame = CFrame.lookAt(
-                        Vector3.new(0, 1.5, -8),
-                        Vector3.new(0, 1.5, 0)
+                        Vector3.new(0, 1.0, -10),
+                        Vector3.new(0, 1.0, 0)
                     )
                 end
 
@@ -2375,8 +2374,8 @@
                 end
                 function api:Focus()
                     cam.CFrame = CFrame.lookAt(
-                        Vector3.new(0, 1.5, -8),
-                        Vector3.new(0, 1.5, 0)
+                        Vector3.new(0, 1.0, -10),
+                        Vector3.new(0, 1.0, 0)
                     )
                 end
 
