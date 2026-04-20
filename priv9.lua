@@ -2301,8 +2301,36 @@
                     cfg._camera = viewport_camera
 
                     if cfg.Object then
-                        local obj = cfg.Clone and cfg.Object:Clone() or cfg.Object
+                        local obj
+                        if cfg.Clone then
+                            local wasArchivable = cfg.Object.Archivable
+                            cfg.Object.Archivable = true
+                            obj = cfg.Object:Clone()
+                            cfg.Object.Archivable = wasArchivable
+                        else
+                            obj = cfg.Object
+                        end
+
                         obj.Parent = world_model
+
+                        -- Reposition to origin so camera can see it
+                        if obj:IsA("Model") then
+                            local hrp = obj:FindFirstChild("HumanoidRootPart") or obj.PrimaryPart
+                            if hrp then
+                                obj:PivotTo(CFrame.new(0, 0, 0))
+                                hrp.Anchored = true
+                            end
+                            -- Strip scripts/animations to prevent issues
+                            for _, desc in obj:GetDescendants() do
+                                if desc:IsA("BaseScript") or desc:IsA("LocalScript") then
+                                    desc:Destroy()
+                                end
+                            end
+                        elseif obj:IsA("BasePart") then
+                            obj.CFrame = CFrame.new(0, 0, 0)
+                            obj.Anchored = true
+                        end
+
                         cfg._object = obj
                     end
                 --
