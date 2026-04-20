@@ -2224,6 +2224,202 @@
                 return setmetatable(cfg, library)
             end
 
+            function library:viewport(id, options) 
+                options = options or {}
+                local cfg = {
+                    id = id or "Viewport",
+                    flag = id or "Flag",
+                    
+                    Object = options.Object or nil,
+                    Clone = (options.Clone ~= nil and options.Clone) or true,
+                    Interactive = options.Interactive or false,
+                    AutoFocus = (options.AutoFocus ~= nil and options.AutoFocus) or true,
+                    Height = options.Height or 200,
+                    Callback = options.Callback or function() end,
+
+                    count = self.count;
+                    color = self.color;
+
+                    _object = nil,
+                    _camera = nil,
+                }
+
+                -- Instances
+                    local viewport_holder = library:create("Frame", {
+                        Parent = self.elements;
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(1, 0, 0, cfg.Height + 18);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = themes.preset[tostring(self.count)]
+                    }); library:apply_theme(viewport_holder, tostring(self.count), "BackgroundColor3")
+
+                    library:create("TextLabel", {
+                        FontFace = fonts["ProggyClean"];
+                        TextColor3 = rgb(255, 255, 255);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Text = cfg.id;
+                        Parent = viewport_holder;
+                        Size = dim2(1, 0, 0, 14);
+                        Position = dim2(0, 4, 0, 1);
+                        BackgroundTransparency = 1;
+                        TextXAlignment = Enum.TextXAlignment.Left;
+                        BorderSizePixel = 0;
+                        TextSize = 12;
+                        BackgroundColor3 = rgb(255, 255, 255)
+                    }); 
+
+                    local viewport_bg = library:create("Frame", {
+                        Parent = viewport_holder;
+                        Position = dim2(0, 2, 0, 16);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(1, -4, 1, -18);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = rgb(0, 0, 0);
+                        BackgroundTransparency = 0.6;
+                    }); 
+
+                    local viewport_frame = library:create("ViewportFrame", {
+                        Parent = viewport_bg;
+                        Position = dim2(0, 2, 0, 2);
+                        Size = dim2(1, -4, 1, -4);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = rgb(15, 15, 15);
+                        BackgroundTransparency = 0;
+                        Ambient = rgb(200, 200, 200);
+                        LightColor = rgb(255, 255, 255);
+                        LightDirection = vec3(-1, -1, -1);
+                    }); cfg.viewport_frame = viewport_frame
+
+                    local world_model = library:create("WorldModel", {
+                        Parent = viewport_frame;
+                    }); cfg.world_model = world_model
+
+                    local viewport_camera = options.Camera or Instance.new("Camera")
+                    viewport_camera.FieldOfView = 50
+                    viewport_frame.CurrentCamera = viewport_camera
+                    viewport_camera.Parent = viewport_frame
+                    cfg._camera = viewport_camera
+
+                    if cfg.Object then
+                        local obj = cfg.Clone and cfg.Object:Clone() or cfg.Object
+                        obj.Parent = world_model
+                        cfg._object = obj
+                    end
+                --
+
+                -- Methods
+                    function cfg:Focus()
+                        local obj = self._object
+                        if not obj then return end
+
+                        local cf, size
+                        if obj:IsA("Model") then
+                            cf, size = obj:GetBoundingBox()
+                        elseif obj:IsA("BasePart") then
+                            cf = obj.CFrame
+                            size = obj.Size
+                        else
+                            return
+                        end
+
+                        local maxDim = math.max(size.X, size.Y, size.Z)
+                        local dist = maxDim * 1.8
+                        self._camera.CFrame = CFrame.new(cf.Position + vec3(dist * 0.6, dist * 0.4, dist), cf.Position)
+                    end
+
+                    function cfg:SetObject(object)
+                        if self._object then
+                            self._object:Destroy()
+                        end
+                        local obj = self.Clone and object:Clone() or object
+                        obj.Parent = world_model
+                        self._object = obj
+                        if self.AutoFocus then
+                            self:Focus()
+                        end
+                        self.Callback(obj)
+                    end
+
+                    function cfg:SetCamera(camera)
+                        self._camera = camera
+                        camera.Parent = viewport_frame
+                        viewport_frame.CurrentCamera = camera
+                    end
+
+                    function cfg:SetInteractive(interactive)
+                        self.Interactive = interactive
+                    end
+
+                    function cfg:SetHeight(height)
+                        self.Height = height
+                        viewport_holder.Size = dim2(1, 0, 0, height + 18)
+                    end
+
+                    if cfg.AutoFocus and cfg._object then
+                        cfg:Focus()
+                    end
+                --
+
+                -- Connections (interactive orbit)
+                    local dragging = false
+                    local lastPos = nil
+                    local orbitX = 0
+                    local orbitY = 25
+
+                    viewport_frame.InputBegan:Connect(function(input)
+                        if not cfg.Interactive then return end
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                            dragging = true
+                            lastPos = vec2(input.Position.X, input.Position.Y)
+                        end
+                    end)
+
+                    uis.InputChanged:Connect(function(input)
+                        if not cfg.Interactive then return end
+                        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                            local delta = vec2(input.Position.X, input.Position.Y) - lastPos
+                            lastPos = vec2(input.Position.X, input.Position.Y)
+                            orbitX = orbitX + delta.X * 0.5
+                            orbitY = clamp(orbitY - delta.Y * 0.5, -80, 80)
+
+                            local obj = cfg._object
+                            if obj then
+                                local cf, size
+                                if obj:IsA("Model") then
+                                    cf, size = obj:GetBoundingBox()
+                                elseif obj:IsA("BasePart") then
+                                    cf = obj.CFrame
+                                    size = obj.Size
+                                end
+
+                                if cf and size then
+                                    local maxDim = math.max(size.X, size.Y, size.Z)
+                                    local dist = maxDim * 1.8
+                                    local rx = rad(orbitY)
+                                    local ry = rad(orbitX)
+                                    local offset = vec3(
+                                        math.cos(rx) * math.sin(ry) * dist,
+                                        math.sin(rx) * dist,
+                                        math.cos(rx) * math.cos(ry) * dist
+                                    )
+                                    cfg._camera.CFrame = CFrame.new(cf.Position + offset, cf.Position)
+                                end
+                            end
+                        end
+                    end)
+
+                    library:connection(uis.InputEnded, function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                            dragging = false
+                        end
+                    end)
+                --
+
+                cfg.Callback(cfg)
+
+                return cfg
+            end
+
             function library:textbox(options) 
 
                 local cfg = {
