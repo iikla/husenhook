@@ -2278,26 +2278,26 @@
                         BackgroundTransparency = 0.6;
                     }); 
 
-                    local viewport_frame = library:create("ViewportFrame", {
-                        Parent = viewport_bg;
-                        Position = dim2(0, 2, 0, 2);
-                        Size = dim2(1, -4, 1, -4);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(15, 15, 15);
-                        BackgroundTransparency = 0;
-                        Ambient = rgb(200, 200, 200);
-                        LightColor = rgb(255, 255, 255);
-                        LightDirection = vec3(-1, -1, -1);
-                    }); cfg.viewport_frame = viewport_frame
+                    local viewport_frame = Instance.new("ViewportFrame")
+                    viewport_frame.Parent = viewport_bg
+                    viewport_frame.Position = dim2(0, 2, 0, 2)
+                    viewport_frame.Size = dim2(1, -4, 1, -4)
+                    viewport_frame.BorderSizePixel = 0
+                    viewport_frame.BackgroundColor3 = rgb(15, 15, 15)
+                    viewport_frame.BackgroundTransparency = 0
+                    viewport_frame.Ambient = rgb(200, 200, 200)
+                    viewport_frame.LightColor = rgb(255, 255, 255)
+                    viewport_frame.LightDirection = vec3(-1, -1, -1)
+                    cfg.viewport_frame = viewport_frame
 
-                    local world_model = library:create("WorldModel", {
-                        Parent = viewport_frame;
-                    }); cfg.world_model = world_model
+                    local world_model = Instance.new("WorldModel")
+                    world_model.Parent = viewport_frame
+                    cfg.world_model = world_model
 
-                    local viewport_camera = options.Camera or Instance.new("Camera")
+                    local viewport_camera = Instance.new("Camera")
                     viewport_camera.FieldOfView = 50
-                    viewport_frame.CurrentCamera = viewport_camera
                     viewport_camera.Parent = viewport_frame
+                    viewport_frame.CurrentCamera = viewport_camera
                     cfg._camera = viewport_camera
 
                     if cfg.Object then
@@ -2311,16 +2311,14 @@
                             obj = cfg.Object
                         end
 
-                        obj.Parent = world_model
-
                         -- Reposition to origin so camera can see it
                         if obj:IsA("Model") then
                             local hrp = obj:FindFirstChild("HumanoidRootPart") or obj.PrimaryPart
                             if hrp then
-                                obj:PivotTo(CFrame.new(0, 0, 0))
+                                obj:PivotTo(CFrame.new(0, 3, 0))
                                 hrp.Anchored = true
                             end
-                            -- Strip scripts/animations to prevent issues
+                            -- Strip scripts to prevent issues
                             for _, desc in obj:GetDescendants() do
                                 if desc:IsA("BaseScript") or desc:IsA("LocalScript") then
                                     desc:Destroy()
@@ -2331,6 +2329,7 @@
                             obj.Anchored = true
                         end
 
+                        obj.Parent = world_model
                         cfg._object = obj
                     end
                 --
@@ -2340,19 +2339,20 @@
                         local obj = self._object
                         if not obj then return end
 
-                        local cf, size
+                        local center, size
                         if obj:IsA("Model") then
-                            cf, size = obj:GetBoundingBox()
+                            center, size = obj:GetBoundingBox()
                         elseif obj:IsA("BasePart") then
-                            cf = obj.CFrame
+                            center = obj.CFrame
                             size = obj.Size
                         else
                             return
                         end
 
                         local maxDim = math.max(size.X, size.Y, size.Z)
-                        local dist = maxDim * 1.8
-                        self._camera.CFrame = CFrame.new(cf.Position + vec3(dist * 0.6, dist * 0.4, dist), cf.Position)
+                        local dist = maxDim * 2
+                        local camPos = center.Position + vec3(dist * 0.7, dist * 0.3, dist * 0.7)
+                        self._camera.CFrame = CFrame.lookAt(camPos, center.Position)
                     end
 
                     function cfg:SetObject(object)
