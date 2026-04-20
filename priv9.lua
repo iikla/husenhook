@@ -2227,6 +2227,7 @@
             function library:viewport(id, options) 
                 options = options or {}
                 local height = options.Height or 200
+                local frame_height = height - 40
                 local source_object = options.Object
 
                 -- Tab page: elements > dark > accent > scrollingFrame > tab_page
@@ -2235,7 +2236,7 @@
                 -- Invisible placeholder in section layout (reserves space)
                 local placeholder = library:create("Frame", {
                     Parent = self.elements;
-                    Size = dim2(1, 0, 0, height);
+                    Size = dim2(1, 0, 0, frame_height);
                     BorderSizePixel = 0;
                     BackgroundTransparency = 1;
                 })
@@ -2266,7 +2267,7 @@
                     local p = placeholder.AbsolutePosition
                     local s = placeholder.AbsoluteSize
                     container.Position = dim_offset(p.X, p.Y)
-                    container.Size = dim_offset(s.X, height)
+                    container.Size = dim_offset(s.X, frame_height)
                     
                     -- Only show when the tab page is visible
                     if tab_page then
@@ -2369,7 +2370,8 @@
                 end
                 function api:SetHeight(h)
                     height = h
-                    placeholder.Size = dim2(1, 0, 0, h)
+                    frame_height = h - 40
+                    placeholder.Size = dim2(1, 0, 0, frame_height)
                     sync()
                 end
                 function api:Focus()
