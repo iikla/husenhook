@@ -2228,193 +2228,125 @@
                 options = options or {}
                 local cfg = {
                     id = id or "Viewport",
-                    flag = id or "Flag",
-                    
                     Object = options.Object or nil,
                     Clone = (options.Clone ~= nil and options.Clone) or true,
-                    Interactive = options.Interactive or false,
-                    AutoFocus = (options.AutoFocus ~= nil and options.AutoFocus) or true,
                     Height = options.Height or 200,
-                    Callback = options.Callback or function() end,
-
-                    count = self.count;
-                    color = self.color;
-
                     _object = nil,
                     _camera = nil,
+                    count = self.count,
+                    color = self.color,
                 }
 
-                -- Instances
-                    local viewport_frame = Instance.new("ViewportFrame")
-                    viewport_frame.Size = dim2(1, 0, 0, cfg.Height)
-                    viewport_frame.BackgroundColor3 = rgb(15, 15, 15)
-                    viewport_frame.BackgroundTransparency = 0
-                    viewport_frame.Ambient = Color3.fromRGB(150, 150, 150)
-                    viewport_frame.LightColor = Color3.fromRGB(255, 255, 255)
-                    viewport_frame.LightDirection = Vector3.new(1, -1, 0.5)
-                    viewport_frame.Parent = self.elements
-                    cfg.viewport_frame = viewport_frame
+                -- Placeholder in section so it takes up space in the layout
+                local placeholder = library:create("TextButton", {
+                    Parent = self.elements;
+                    Text = "";
+                    AutoButtonColor = false;
+                    Size = dim2(1, 0, 0, cfg.Height);
+                    BorderSizePixel = 0;
+                    BackgroundTransparency = 1;
+                })
 
-                    local viewport_camera = Instance.new("Camera")
-                    viewport_camera.FieldOfView = 70
-                    viewport_camera.Parent = viewport_frame
-                    viewport_frame.CurrentCamera = viewport_camera
-                    cfg._camera = viewport_camera
+                -- ViewportFrame parented directly to ScreenGui (bypasses nested frames)
+                local viewport_frame = Instance.new("ViewportFrame")
+                viewport_frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                viewport_frame.BackgroundTransparency = 0
+                viewport_frame.Ambient = Color3.fromRGB(200, 200, 200)
+                viewport_frame.LightColor = Color3.fromRGB(255, 255, 255)
+                viewport_frame.LightDirection = Vector3.new(-1, -1, -1)
+                viewport_frame.Parent = library.gui
+                cfg.viewport_frame = viewport_frame
 
-                    local function prepare_object(source)
-                        local obj
-                        if cfg.Clone then
-                            local wasArchivable = source.Archivable
-                            source.Archivable = true
-                            obj = source:Clone()
-                            source.Archivable = wasArchivable
-                        else
-                            obj = source
-                        end
+                local viewport_camera = Instance.new("Camera")
+                viewport_camera.FieldOfView = 70
+                viewport_camera.Parent = viewport_frame
+                viewport_frame.CurrentCamera = viewport_camera
+                cfg._camera = viewport_camera
 
-                        -- Destroy Humanoid (causes ViewportFrame rendering issues)
-                        local humanoid = obj:FindFirstChildWhichIsA("Humanoid")
-                        if humanoid then humanoid:Destroy() end
+                -- Position the viewport over the placeholder
+                local function update_position()
+                    local absPos = placeholder.AbsolutePosition
+                    local absSize = placeholder.AbsoluteSize
+                    viewport_frame.Position = dim_offset(absPos.X, absPos.Y)
+                    viewport_frame.Size = dim_offset(absSize.X, cfg.Height)
+                end
 
-                        -- Destroy scripts
-                        for _, desc in obj:GetDescendants() do
-                            if desc:IsA("BaseScript") then
-                                desc:Destroy()
-                            end
-                        end
+                placeholder:GetPropertyChangedSignal("AbsolutePosition"):Connect(update_position)
+                placeholder:GetPropertyChangedSignal("AbsoluteSize"):Connect(update_position)
+                task.defer(update_position)
 
-                        -- Anchor all parts and move to origin
-                        for _, desc in obj:GetDescendants() do
-                            if desc:IsA("BasePart") then
-                                desc.Anchored = true
-                            end
-                        end
-
-                        if obj:IsA("Model") then
-                            local pivot = obj:GetPivot()
-                            obj:PivotTo(CFrame.new(0, 0, 0))
-                        elseif obj:IsA("BasePart") then
-                            obj.CFrame = CFrame.new(0, 0, 0)
-                            obj.Anchored = true
-                        end
-
-                        obj.Parent = viewport_frame
-                        return obj
+                -- Prepare object
+                local function prepare_object(source)
+                    local obj
+                    if cfg.Clone then
+                        local wasArchivable = source.Archivable
+                        source.Archivable = true
+                        obj = source:Clone()
+                        source.Archivable = wasArchivable
+                    else
+                        obj = source
                     end
 
-                    if cfg.Object then
-                        cfg._object = prepare_object(cfg.Object)
-                    end
-                --
+                    local humanoid = obj:FindFirstChildWhichIsA("Humanoid")
+                    if humanoid then humanoid:Destroy() end
 
-                -- Methods
-                    function cfg:Focus()
-                        local obj = self._object
-                        if not obj then return end
-
-                        local center, size
-                        if obj:IsA("Model") then
-                            center, size = obj:GetBoundingBox()
-                        elseif obj:IsA("BasePart") then
-                            center = obj.CFrame
-                            size = obj.Size
-                        else
-                            return
-                        end
-
-                        local maxDim = math.max(size.X, size.Y, size.Z)
-                        local dist = maxDim * 1.5
-                        local camPos = center.Position + vec3(dist, dist * 0.5, dist)
-                        self._camera.CFrame = CFrame.lookAt(camPos, center.Position)
+                    for _, desc in obj:GetDescendants() do
+                        if desc:IsA("BaseScript") then desc:Destroy() end
                     end
 
-                    function cfg:SetObject(object)
-                        if self._object then
-                            self._object:Destroy()
-                        end
-                        self._object = prepare_object(object)
-                        if self.AutoFocus then
-                            self:Focus()
-                        end
-                        self.Callback(obj)
+                    for _, desc in obj:GetDescendants() do
+                        if desc:IsA("BasePart") then desc.Anchored = true end
                     end
 
-                    function cfg:SetCamera(camera)
-                        self._camera = camera
-                        camera.Parent = viewport_frame
-                        viewport_frame.CurrentCamera = camera
+                    if obj:IsA("Model") then
+                        obj:PivotTo(CFrame.new(0, 0, 0))
+                    elseif obj:IsA("BasePart") then
+                        obj.CFrame = CFrame.new(0, 0, 0)
+                        obj.Anchored = true
                     end
 
-                    function cfg:SetInteractive(interactive)
-                        self.Interactive = interactive
-                    end
+                    obj.Parent = viewport_frame
+                    return obj
+                end
 
-                    function cfg:SetHeight(height)
-                        self.Height = height
-                        viewport_frame.Size = dim2(1, 0, 0, height)
-                    end
+                if cfg.Object then
+                    cfg._object = prepare_object(cfg.Object)
+                end
 
-                    if cfg.AutoFocus and cfg._object then
-                        cfg:Focus()
-                    end
-                --
+                -- Focus
+                function cfg:Focus()
+                    local obj = self._object
+                    if not obj then return end
+                    local center, size
+                    if obj:IsA("Model") then
+                        center, size = obj:GetBoundingBox()
+                    elseif obj:IsA("BasePart") then
+                        center = obj.CFrame
+                        size = obj.Size
+                    else return end
+                    local maxDim = math.max(size.X, size.Y, size.Z)
+                    local dist = maxDim * 2
+                    self._camera.CFrame = CFrame.lookAt(
+                        center.Position + Vector3.new(dist, dist * 0.5, dist),
+                        center.Position
+                    )
+                end
 
-                -- Connections (interactive orbit)
-                    local dragging = false
-                    local lastPos = nil
-                    local orbitX = 0
-                    local orbitY = 25
+                function cfg:SetObject(object)
+                    if self._object then self._object:Destroy() end
+                    self._object = prepare_object(object)
+                    self:Focus()
+                end
 
-                    viewport_frame.InputBegan:Connect(function(input)
-                        if not cfg.Interactive then return end
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                            dragging = true
-                            lastPos = vec2(input.Position.X, input.Position.Y)
-                        end
-                    end)
+                function cfg:SetHeight(height)
+                    self.Height = height
+                    placeholder.Size = dim2(1, 0, 0, height)
+                    update_position()
+                end
 
-                    uis.InputChanged:Connect(function(input)
-                        if not cfg.Interactive then return end
-                        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                            local delta = vec2(input.Position.X, input.Position.Y) - lastPos
-                            lastPos = vec2(input.Position.X, input.Position.Y)
-                            orbitX = orbitX + delta.X * 0.5
-                            orbitY = clamp(orbitY - delta.Y * 0.5, -80, 80)
-
-                            local obj = cfg._object
-                            if obj then
-                                local cf, size
-                                if obj:IsA("Model") then
-                                    cf, size = obj:GetBoundingBox()
-                                elseif obj:IsA("BasePart") then
-                                    cf = obj.CFrame
-                                    size = obj.Size
-                                end
-
-                                if cf and size then
-                                    local maxDim = math.max(size.X, size.Y, size.Z)
-                                    local dist = maxDim * 1.8
-                                    local rx = rad(orbitY)
-                                    local ry = rad(orbitX)
-                                    local offset = vec3(
-                                        math.cos(rx) * math.sin(ry) * dist,
-                                        math.sin(rx) * dist,
-                                        math.cos(rx) * math.cos(ry) * dist
-                                    )
-                                    cfg._camera.CFrame = CFrame.new(cf.Position + offset, cf.Position)
-                                end
-                            end
-                        end
-                    end)
-
-                    library:connection(uis.InputEnded, function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                            dragging = false
-                        end
-                    end)
-                --
-
-                cfg.Callback(cfg)
+                if cfg._object then
+                    cfg:Focus()
+                end
 
                 return cfg
             end
