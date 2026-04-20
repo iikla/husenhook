@@ -2245,49 +2245,14 @@
                 }
 
                 -- Instances
-                    local viewport_holder = library:create("Frame", {
-                        Parent = self.elements;
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, 0, 0, cfg.Height + 18);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = themes.preset[tostring(self.count)]
-                    }); library:apply_theme(viewport_holder, tostring(self.count), "BackgroundColor3")
-
-                    library:create("TextLabel", {
-                        FontFace = fonts["ProggyClean"];
-                        TextColor3 = rgb(255, 255, 255);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Text = cfg.id;
-                        Parent = viewport_holder;
-                        Size = dim2(1, 0, 0, 14);
-                        Position = dim2(0, 4, 0, 1);
-                        BackgroundTransparency = 1;
-                        TextXAlignment = Enum.TextXAlignment.Left;
-                        BorderSizePixel = 0;
-                        TextSize = 12;
-                        BackgroundColor3 = rgb(255, 255, 255)
-                    }); 
-
-                    local viewport_bg = library:create("Frame", {
-                        Parent = viewport_holder;
-                        Position = dim2(0, 2, 0, 16);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -4, 1, -18);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0);
-                        BackgroundTransparency = 0.6;
-                    }); 
-
                     local viewport_frame = Instance.new("ViewportFrame")
-                    viewport_frame.Parent = viewport_bg
-                    viewport_frame.Position = dim2(0, 2, 0, 2)
-                    viewport_frame.Size = dim2(1, -4, 1, -4)
-                    viewport_frame.BorderSizePixel = 0
+                    viewport_frame.Size = dim2(1, 0, 0, cfg.Height)
                     viewport_frame.BackgroundColor3 = rgb(15, 15, 15)
                     viewport_frame.BackgroundTransparency = 0
-                    viewport_frame.Ambient = rgb(150, 150, 150)
-                    viewport_frame.LightColor = rgb(255, 255, 255)
-                    viewport_frame.LightDirection = vec3(1, -1, 0.5)
+                    viewport_frame.Ambient = Color3.fromRGB(150, 150, 150)
+                    viewport_frame.LightColor = Color3.fromRGB(255, 255, 255)
+                    viewport_frame.LightDirection = Vector3.new(1, -1, 0.5)
+                    viewport_frame.Parent = self.elements
                     cfg.viewport_frame = viewport_frame
 
                     local viewport_camera = Instance.new("Camera")
@@ -2386,7 +2351,7 @@
 
                     function cfg:SetHeight(height)
                         self.Height = height
-                        viewport_holder.Size = dim2(1, 0, 0, height + 18)
+                        viewport_frame.Size = dim2(1, 0, 0, height)
                     end
 
                     if cfg.AutoFocus and cfg._object then
