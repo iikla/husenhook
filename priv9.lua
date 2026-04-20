@@ -2227,6 +2227,10 @@
             function library:viewport(id, options) 
                 options = options or {}
                 local height = options.Height or 200
+                local source_object = options.Object
+
+                -- Tab page (column ScrollingFrame's parent = tab page)
+                local tab_page = self.column and self.column.Parent or nil
 
                 -- Invisible placeholder in section layout (reserves space)
                 local placeholder = library:create("Frame", {
@@ -2236,103 +2240,133 @@
                     BackgroundTransparency = 1;
                 })
 
-                -- Container frame on ScreenGui (direct child = guaranteed render)
+                -- Container on ScreenGui (direct child = guaranteed render)
                 local container = Instance.new("Frame")
-                container.BackgroundColor3 = rgb(20, 20, 20)
+                container.BackgroundTransparency = 1
                 container.BorderSizePixel = 0
-                container.BackgroundTransparency = 0
                 container.ClipsDescendants = true
                 container.Parent = library.gui
 
                 -- Viewport inside the container
                 local vpf = Instance.new("ViewportFrame")
                 vpf.Size = dim2(1, 0, 1, 0)
-                vpf.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                vpf.BackgroundTransparency = 0
+                vpf.BackgroundTransparency = 1
                 vpf.Ambient = Color3.fromRGB(200, 200, 200)
                 vpf.LightColor = Color3.fromRGB(255, 255, 255)
-                vpf.LightDirection = Vector3.new(-1, -1, -1)
+                vpf.LightDirection = Vector3.new(0, -0.5, -1)
                 vpf.Parent = container
 
                 local cam = Instance.new("Camera")
-                cam.FieldOfView = 70
+                cam.FieldOfView = 30
                 cam.Parent = vpf
                 vpf.CurrentCamera = cam
 
-                -- Keep container positioned over placeholder
+                -- Position container over placeholder + tab visibility
                 local function sync()
                     local p = placeholder.AbsolutePosition
                     local s = placeholder.AbsoluteSize
                     container.Position = dim_offset(p.X, p.Y)
                     container.Size = dim_offset(s.X, height)
+                    
+                    -- Only show when the tab page is visible
+                    if tab_page then
+                        container.Visible = tab_page.Visible
+                    end
                 end
                 placeholder:GetPropertyChangedSignal("AbsolutePosition"):Connect(sync)
                 placeholder:GetPropertyChangedSignal("AbsoluteSize"):Connect(sync)
+                if tab_page then
+                    tab_page:GetPropertyChangedSignal("Visible"):Connect(sync)
+                end
                 task.defer(sync)
 
                 -- State
-                local current_object = nil
+                local current_clone = nil
+                local part_map = {} -- maps clone part to source part
 
-                local function load_object(source)
+                local function build_clone(source)
                     if not source then return end
+                    if current_clone then current_clone:Destroy() end
+                    part_map = {}
                     
                     -- Clone with Archivable fix
                     local wasArch = source.Archivable
                     source.Archivable = true
                     local clone = source:Clone()
                     source.Archivable = wasArch
-                    
                     if not clone then return end
 
-                    -- Clean up clone for viewport
+                    -- Remove humanoid + scripts
                     local hum = clone:FindFirstChildWhichIsA("Humanoid")
                     if hum then hum:Destroy() end
-
                     for _, d in clone:GetDescendants() do
                         if d:IsA("BaseScript") then d:Destroy() end
                     end
 
+                    -- Anchor all parts
                     for _, d in clone:GetDescendants() do
                         if d:IsA("BasePart") then d.Anchored = true end
                     end
 
+                    -- Build part map (source name -> clone part)
+                    for _, d in clone:GetDescendants() do
+                        if d:IsA("BasePart") then
+                            local sourcePart = source:FindFirstChild(d.Name, true)
+                            if sourcePart and sourcePart:IsA("BasePart") then
+                                part_map[d] = sourcePart
+                            end
+                        end
+                    end
+                    -- Also map root parts
+                    if clone:IsA("BasePart") then
+                        part_map[clone] = source
+                    end
+
                     clone:PivotTo(CFrame.new(0, 0, 0))
                     clone.Parent = vpf
+                    current_clone = clone
 
-                    -- Focus camera
-                    local _, size = clone:GetBoundingBox()
-                    local maxDim = math.max(size.X, size.Y, size.Z)
-                    local dist = maxDim * 2
+                    -- Set camera in front of character
                     cam.CFrame = CFrame.lookAt(
-                        Vector3.new(dist, dist * 0.5, dist), 
-                        Vector3.new(0, 0, 0)
+                        Vector3.new(0, 1.5, -8),
+                        Vector3.new(0, 1.5, 0)
                     )
-
-                    current_object = clone
                 end
+
+                -- Heartbeat: sync clone CFrames from source character
+                library:connection(run.Heartbeat, function()
+                    if not current_clone or not source_object or not source_object.Parent then return end
+                    if not container.Visible then return end
+
+                    -- Get source's root CFrame to calculate relative positions
+                    local sourceRoot = source_object:FindFirstChild("HumanoidRootPart")
+                    if not sourceRoot then return end
+                    local rootCF = sourceRoot.CFrame
+
+                    for clonePart, sourcePart in part_map do
+                        if clonePart.Parent and sourcePart.Parent then
+                            -- Get part's offset relative to source HRP, apply at origin
+                            local relativeCF = rootCF:ToObjectSpace(sourcePart.CFrame)
+                            clonePart.CFrame = CFrame.new(0, 0, 0) * relativeCF
+                        end
+                    end
+                end)
 
                 -- Load object with delay to ensure character is ready
                 task.spawn(function()
-                    local source = options.Object
-                    if not source then return end
-
-                    -- Wait for character to have parts
-                    if source:IsA("Model") then
-                        local hrp = source:FindFirstChild("HumanoidRootPart")
-                        if not hrp then
-                            source:WaitForChild("HumanoidRootPart", 10)
-                        end
+                    if not source_object then return end
+                    if source_object:IsA("Model") then
+                        source_object:WaitForChild("HumanoidRootPart", 10)
                         task.wait(0.5)
                     end
-
-                    load_object(source)
+                    build_clone(source_object)
                 end)
 
                 -- API
                 local api = {}
                 function api:SetObject(object)
-                    if current_object then current_object:Destroy() end
-                    load_object(object)
+                    source_object = object
+                    build_clone(object)
                 end
                 function api:SetHeight(h)
                     height = h
@@ -2340,13 +2374,9 @@
                     sync()
                 end
                 function api:Focus()
-                    if not current_object then return end
-                    local _, size = current_object:GetBoundingBox()
-                    local maxDim = math.max(size.X, size.Y, size.Z)
-                    local dist = maxDim * 2
                     cam.CFrame = CFrame.lookAt(
-                        Vector3.new(dist, dist * 0.5, dist), 
-                        Vector3.new(0, 0, 0)
+                        Vector3.new(0, 1.5, -8),
+                        Vector3.new(0, 1.5, 0)
                     )
                 end
 
