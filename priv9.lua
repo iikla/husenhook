@@ -2286,14 +2286,13 @@
 
                 local function get_ideal_camera_cframe(obj)
                     if not obj then return CFrame.new() end
-                    local _, size = obj:GetBoundingBox()
+                    local cf, size = obj:GetBoundingBox()
                     local maxDim = math.max(size.X, size.Y, size.Z)
-                    -- For FOV 45, maxDim * 1.4 frames it perfectly with a slight margin
-                    local dist = maxDim * 1.4
-                    local centerY = size.Y * 0.5 -- Look at the exact vertical center
+                    -- For FOV 45, maxDim * 1.5 frames it perfectly regardless of pivot offset
+                    local dist = maxDim * 1.5
                     return CFrame.lookAt(
-                        Vector3.new(0, centerY, -dist),
-                        Vector3.new(0, centerY, 0)
+                        cf.Position + Vector3.new(0, 0, -dist),
+                        cf.Position
                     )
                 end
 
