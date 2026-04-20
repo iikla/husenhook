@@ -2229,8 +2229,8 @@
                 local height = options.Height or 200
                 local source_object = options.Object
 
-                -- Tab page (column ScrollingFrame's parent = tab page)
-                local tab_page = self.column and self.column.Parent or nil
+                -- Tab page: elements > dark > accent > scrollingFrame > tab_page
+                local tab_page = self.elements and self.elements.Parent and self.elements.Parent.Parent and self.elements.Parent.Parent.Parent and self.elements.Parent.Parent.Parent.Parent or nil
 
                 -- Invisible placeholder in section layout (reserves space)
                 local placeholder = library:create("Frame", {
