@@ -2285,14 +2285,13 @@
                 local part_map = {} -- maps clone part to source part
 
                 local function get_ideal_camera_cframe(obj)
-                    if not obj then return CFrame.new() end
-                    local cf, size = obj:GetBoundingBox()
-                    local maxDim = math.max(size.X, size.Y, size.Z)
-                    -- For FOV 45, maxDim * 1.5 frames it perfectly regardless of pivot offset
-                    local dist = maxDim * 1.5
+                    -- Hardcode targeting to the center of the chest (Y=1.5 relative to HRP at 0)
+                    -- This prevents erratic bounding boxes from giant hats/accessories ruining the centering.
+                    local center = Vector3.new(0, 1.5, 0)
+                    local dist = 11
                     return CFrame.lookAt(
-                        cf.Position + Vector3.new(0, 0, -dist),
-                        cf.Position
+                        center + Vector3.new(0, 0, -dist),
+                        center
                     )
                 end
 
