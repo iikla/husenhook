@@ -2226,129 +2226,131 @@
 
             function library:viewport(id, options) 
                 options = options or {}
-                local cfg = {
-                    id = id or "Viewport",
-                    Object = options.Object or nil,
-                    Clone = (options.Clone ~= nil and options.Clone) or true,
-                    Height = options.Height or 200,
-                    _object = nil,
-                    _camera = nil,
-                    count = self.count,
-                    color = self.color,
-                }
+                local height = options.Height or 200
 
-                -- Placeholder in section so it takes up space in the layout
-                local placeholder = library:create("TextButton", {
+                -- Invisible placeholder in section layout (reserves space)
+                local placeholder = library:create("Frame", {
                     Parent = self.elements;
-                    Text = "";
-                    AutoButtonColor = false;
-                    Size = dim2(1, 0, 0, cfg.Height);
+                    Size = dim2(1, 0, 0, height);
                     BorderSizePixel = 0;
                     BackgroundTransparency = 1;
                 })
 
-                -- ViewportFrame parented directly to ScreenGui (bypasses nested frames)
-                local viewport_frame = Instance.new("ViewportFrame")
-                viewport_frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                viewport_frame.BackgroundTransparency = 0
-                viewport_frame.Ambient = Color3.fromRGB(200, 200, 200)
-                viewport_frame.LightColor = Color3.fromRGB(255, 255, 255)
-                viewport_frame.LightDirection = Vector3.new(-1, -1, -1)
-                viewport_frame.Parent = library.gui
-                cfg.viewport_frame = viewport_frame
+                -- Container frame on ScreenGui (direct child = guaranteed render)
+                local container = Instance.new("Frame")
+                container.BackgroundColor3 = rgb(20, 20, 20)
+                container.BorderSizePixel = 0
+                container.BackgroundTransparency = 0
+                container.ClipsDescendants = true
+                container.Parent = library.gui
 
-                local viewport_camera = Instance.new("Camera")
-                viewport_camera.FieldOfView = 70
-                viewport_camera.Parent = viewport_frame
-                viewport_frame.CurrentCamera = viewport_camera
-                cfg._camera = viewport_camera
+                -- Viewport inside the container
+                local vpf = Instance.new("ViewportFrame")
+                vpf.Size = dim2(1, 0, 1, 0)
+                vpf.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                vpf.BackgroundTransparency = 0
+                vpf.Ambient = Color3.fromRGB(200, 200, 200)
+                vpf.LightColor = Color3.fromRGB(255, 255, 255)
+                vpf.LightDirection = Vector3.new(-1, -1, -1)
+                vpf.Parent = container
 
-                -- Position the viewport over the placeholder
-                local function update_position()
-                    local absPos = placeholder.AbsolutePosition
-                    local absSize = placeholder.AbsoluteSize
-                    viewport_frame.Position = dim_offset(absPos.X, absPos.Y)
-                    viewport_frame.Size = dim_offset(absSize.X, cfg.Height)
+                local cam = Instance.new("Camera")
+                cam.FieldOfView = 70
+                cam.Parent = vpf
+                vpf.CurrentCamera = cam
+
+                -- Keep container positioned over placeholder
+                local function sync()
+                    local p = placeholder.AbsolutePosition
+                    local s = placeholder.AbsoluteSize
+                    container.Position = dim_offset(p.X, p.Y)
+                    container.Size = dim_offset(s.X, height)
                 end
+                placeholder:GetPropertyChangedSignal("AbsolutePosition"):Connect(sync)
+                placeholder:GetPropertyChangedSignal("AbsoluteSize"):Connect(sync)
+                task.defer(sync)
 
-                placeholder:GetPropertyChangedSignal("AbsolutePosition"):Connect(update_position)
-                placeholder:GetPropertyChangedSignal("AbsoluteSize"):Connect(update_position)
-                task.defer(update_position)
+                -- State
+                local current_object = nil
 
-                -- Prepare object
-                local function prepare_object(source)
-                    local obj
-                    if cfg.Clone then
-                        local wasArchivable = source.Archivable
-                        source.Archivable = true
-                        obj = source:Clone()
-                        source.Archivable = wasArchivable
-                    else
-                        obj = source
+                local function load_object(source)
+                    if not source then return end
+                    
+                    -- Clone with Archivable fix
+                    local wasArch = source.Archivable
+                    source.Archivable = true
+                    local clone = source:Clone()
+                    source.Archivable = wasArch
+                    
+                    if not clone then return end
+
+                    -- Clean up clone for viewport
+                    local hum = clone:FindFirstChildWhichIsA("Humanoid")
+                    if hum then hum:Destroy() end
+
+                    for _, d in clone:GetDescendants() do
+                        if d:IsA("BaseScript") then d:Destroy() end
                     end
 
-                    local humanoid = obj:FindFirstChildWhichIsA("Humanoid")
-                    if humanoid then humanoid:Destroy() end
-
-                    for _, desc in obj:GetDescendants() do
-                        if desc:IsA("BaseScript") then desc:Destroy() end
+                    for _, d in clone:GetDescendants() do
+                        if d:IsA("BasePart") then d.Anchored = true end
                     end
 
-                    for _, desc in obj:GetDescendants() do
-                        if desc:IsA("BasePart") then desc.Anchored = true end
-                    end
+                    clone:PivotTo(CFrame.new(0, 0, 0))
+                    clone.Parent = vpf
 
-                    if obj:IsA("Model") then
-                        obj:PivotTo(CFrame.new(0, 0, 0))
-                    elseif obj:IsA("BasePart") then
-                        obj.CFrame = CFrame.new(0, 0, 0)
-                        obj.Anchored = true
-                    end
-
-                    obj.Parent = viewport_frame
-                    return obj
-                end
-
-                if cfg.Object then
-                    cfg._object = prepare_object(cfg.Object)
-                end
-
-                -- Focus
-                function cfg:Focus()
-                    local obj = self._object
-                    if not obj then return end
-                    local center, size
-                    if obj:IsA("Model") then
-                        center, size = obj:GetBoundingBox()
-                    elseif obj:IsA("BasePart") then
-                        center = obj.CFrame
-                        size = obj.Size
-                    else return end
+                    -- Focus camera
+                    local _, size = clone:GetBoundingBox()
                     local maxDim = math.max(size.X, size.Y, size.Z)
                     local dist = maxDim * 2
-                    self._camera.CFrame = CFrame.lookAt(
-                        center.Position + Vector3.new(dist, dist * 0.5, dist),
-                        center.Position
+                    cam.CFrame = CFrame.lookAt(
+                        Vector3.new(dist, dist * 0.5, dist), 
+                        Vector3.new(0, 0, 0)
+                    )
+
+                    current_object = clone
+                end
+
+                -- Load object with delay to ensure character is ready
+                task.spawn(function()
+                    local source = options.Object
+                    if not source then return end
+
+                    -- Wait for character to have parts
+                    if source:IsA("Model") then
+                        local hrp = source:FindFirstChild("HumanoidRootPart")
+                        if not hrp then
+                            source:WaitForChild("HumanoidRootPart", 10)
+                        end
+                        task.wait(0.5)
+                    end
+
+                    load_object(source)
+                end)
+
+                -- API
+                local api = {}
+                function api:SetObject(object)
+                    if current_object then current_object:Destroy() end
+                    load_object(object)
+                end
+                function api:SetHeight(h)
+                    height = h
+                    placeholder.Size = dim2(1, 0, 0, h)
+                    sync()
+                end
+                function api:Focus()
+                    if not current_object then return end
+                    local _, size = current_object:GetBoundingBox()
+                    local maxDim = math.max(size.X, size.Y, size.Z)
+                    local dist = maxDim * 2
+                    cam.CFrame = CFrame.lookAt(
+                        Vector3.new(dist, dist * 0.5, dist), 
+                        Vector3.new(0, 0, 0)
                     )
                 end
 
-                function cfg:SetObject(object)
-                    if self._object then self._object:Destroy() end
-                    self._object = prepare_object(object)
-                    self:Focus()
-                end
-
-                function cfg:SetHeight(height)
-                    self.Height = height
-                    placeholder.Size = dim2(1, 0, 0, height)
-                    update_position()
-                end
-
-                if cfg._object then
-                    cfg:Focus()
-                end
-
-                return cfg
+                return api
             end
 
             function library:textbox(options) 
