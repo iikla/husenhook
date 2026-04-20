@@ -2227,7 +2227,6 @@
             function library:viewport(id, options) 
                 options = options or {}
                 local height = options.Height or 200
-                local frame_height = height - 40
                 local source_object = options.Object
 
                 -- Tab page: elements > dark > accent > scrollingFrame > tab_page
@@ -2236,7 +2235,7 @@
                 -- Invisible placeholder in section layout (reserves space)
                 local placeholder = library:create("Frame", {
                     Parent = self.elements;
-                    Size = dim2(1, 0, 0, frame_height);
+                    Size = dim2(1, 0, 0, height);
                     BorderSizePixel = 0;
                     BackgroundTransparency = 1;
                 })
@@ -2267,7 +2266,7 @@
                     local p = placeholder.AbsolutePosition
                     local s = placeholder.AbsoluteSize
                     container.Position = dim_offset(p.X, p.Y)
-                    container.Size = dim_offset(s.X, frame_height)
+                    container.Size = dim_offset(s.X, height)
                     
                     -- Only show when the tab page is visible
                     if tab_page then
@@ -2284,6 +2283,19 @@
                 -- State
                 local current_clone = nil
                 local part_map = {} -- maps clone part to source part
+
+                local function get_ideal_camera_cframe(obj)
+                    if not obj then return CFrame.new() end
+                    local _, size = obj:GetBoundingBox()
+                    local maxDim = math.max(size.X, size.Y, size.Z)
+                    -- For FOV 45, maxDim * 1.4 frames it perfectly with a slight margin
+                    local dist = maxDim * 1.4
+                    local centerY = size.Y * 0.5 -- Look at the exact vertical center
+                    return CFrame.lookAt(
+                        Vector3.new(0, centerY, -dist),
+                        Vector3.new(0, centerY, 0)
+                    )
+                end
 
                 local function build_clone(source)
                     if not source then return end
@@ -2327,10 +2339,7 @@
                     clone.Parent = vpf
                     current_clone = clone
 
-                    cam.CFrame = CFrame.lookAt(
-                        Vector3.new(0, 1.0, -10),
-                        Vector3.new(0, 1.0, 0)
-                    )
+                    cam.CFrame = get_ideal_camera_cframe(clone)
                 end
 
                 -- Heartbeat: sync clone CFrames from source character
@@ -2370,15 +2379,13 @@
                 end
                 function api:SetHeight(h)
                     height = h
-                    frame_height = h - 40
-                    placeholder.Size = dim2(1, 0, 0, frame_height)
+                    placeholder.Size = dim2(1, 0, 0, h)
                     sync()
                 end
                 function api:Focus()
-                    cam.CFrame = CFrame.lookAt(
-                        Vector3.new(0, 1.0, -10),
-                        Vector3.new(0, 1.0, 0)
-                    )
+                    if current_clone then
+                        cam.CFrame = get_ideal_camera_cframe(current_clone)
+                    end
                 end
 
                 return api
