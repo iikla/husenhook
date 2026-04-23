@@ -2174,7 +2174,7 @@
                     AutomaticCanvasSize = Enum.AutomaticSize.Y;
                 }); cfg.elements = elements_container
 
-                local list_layout = library:create("UIListLayout", {
+                library:create("UIListLayout", {
                     Parent = elements_container;
                     Padding = dim(0, 6);
                     SortOrder = Enum.SortOrder.LayoutOrder
@@ -2185,14 +2185,6 @@
                     Name = "",
                     PaddingBottom = dim(0, 7)
                 })
-
-                local function update_size()
-                    local contentHeight = list_layout.AbsoluteContentSize.Y + 18
-                    settings_frame.Size = dim2(0, 140, 0, contentHeight)
-                end
-
-                list_layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(update_size)
-                task.delay(0.1, update_size)
 
                 function cfg.set_visible(bool) 
                     settings_frame.Visible = bool
