@@ -2139,7 +2139,7 @@
                     BorderColor3 = rgb(0, 0, 0);
                     Visible = false;
                     Size = dim2(0, 140, 0, 0);
-                    AutomaticSize = Enum.AutomaticSize.XY;
+                    AutomaticSize = Enum.AutomaticSize.Y;
                     BorderSizePixel = 0;
                     BackgroundColor3 = themes.preset[tostring(self.count)]
                 }); library:apply_theme(settings_frame, tostring(self.count), "BackgroundColor3")
