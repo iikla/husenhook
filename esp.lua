@@ -1,872 +1,476 @@
-local workspace = cloneref(game:GetService("Workspace"))
-local run = cloneref(game:GetService("RunService"))
-local http_service = cloneref(game:GetService("HttpService"))
-local players = cloneref(game:GetService("Players"))
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
 
-local vec2 = Vector2.new
-local vec3 = Vector3.new
-local dim2 = UDim2.new
-local dim = UDim.new 
-local rect = Rect.new
-local cfr = CFrame.new
-local empty_cfr = cfr()
-local point_object_space = empty_cfr.PointToObjectSpace
-local angle = CFrame.Angles
-local dim_offset = UDim2.fromOffset
+local floor = math.floor
+local abs = math.abs
+local clamp = math.clamp
+local cos = math.cos
+local sin = math.sin
+local atan2 = math.atan2
+local rad = math.rad
+local V2 = Vector2.new
+local V3 = Vector3.new
 
-local color = Color3.new
-local rgb = Color3.fromRGB
-local hex = Color3.fromHex
-local hsv = Color3.fromHSV
-local rgbseq = ColorSequence.new
-local rgbkey = ColorSequenceKeypoint.new
-local numseq = NumberSequence.new
-local numkey = NumberSequenceKeypoint.new
+local ESP = {
+    Settings = {
+        Enabled = false,
+        MaxDistance = 1500,
+        TeamCheck = true,
+        TextFont = 2,
+        TextSize = 13,
 
-local camera = workspace.CurrentCamera
-
-local bones = {
-    {"Head", "UpperTorso"},
-    {"UpperTorso", "LowerTorso"},
-    {"UpperTorso", "LeftUpperArm"},
-    {"UpperTorso", "RightUpperArm"},
-    {"LeftUpperArm", "LeftLowerArm"},
-    {"RightUpperArm", "RightLowerArm"},
-    {"LowerTorso", "LeftUpperLeg"},
-    {"LowerTorso", "RightUpperLeg"},
-    {"LeftUpperLeg", "LeftLowerLeg"},
-    {"RightUpperLeg", "RightLowerLeg"},
-}
-
-local flags = { -- basically a substitute for ur ui flags (flags["wahdiuawdhwa"])
-    ["Enabled"] = false;
-    ["Names"] = false; 
-    ["Name_Type"] = "Both"; 
-    ["Name_Color"] = { Color = rgb(255, 255, 255) };
-    ["Boxes"] = true;
-    ["Box_Type"] = "Corner";
-    ["Box_Color"] = { Color = rgb(255, 255, 255) };
-    ["Box_Fill"] = false;
-    ["Box_Fill_Type"] = "Solid";
-    ["Box_Fill_Color"] = { Color = rgb(255, 255, 255) };
-    ["Box_Fill_Color2"] = { Color = rgb(0, 0, 0) };
-    ["Box_Fill_Transparency"] = 0.5;
-    ["Box_Fill_Gradient_Rotation"] = 90;
-    ["Healthbar"] = true; 
-    ["Health_Mode"] = "Two Tone";
-    ["Health_High"] = { Color = rgb(0, 255, 0) };
-    ["Health_Low"] = { Color = rgb(255, 0, 0) };
-    ["Distance"] = true;
-    ["Weapon"] = true;
-    ["Skeletons"] = true;
-    ["Skeletons_Color"] = { Color = rgb(255, 255, 255) };
-    ["Distance_Color"] = { Color = rgb(255, 255, 255) };
-    ["Weapon_Color"] = { Color = rgb(255, 255, 255) };
-    
-    ["NPC_Enabled"] = false;
-    ["NPC_Names"] = false; 
-    ["NPC_Name_Type"] = "Both"; 
-    ["NPC_Name_Color"] = { Color = rgb(255, 255, 255) };
-    ["NPC_Boxes"] = true;
-    ["NPC_Box_Type"] = "Corner";
-    ["NPC_Box_Color"] = { Color = rgb(255, 255, 255) };
-    ["NPC_Box_Fill"] = false;
-    ["NPC_Box_Fill_Type"] = "Solid";
-    ["NPC_Box_Fill_Color"] = { Color = rgb(255, 255, 255) };
-    ["NPC_Box_Fill_Color2"] = { Color = rgb(0, 0, 0) };
-    ["NPC_Box_Fill_Transparency"] = 0.5;
-    ["NPC_Box_Fill_Gradient_Rotation"] = 90;
-    ["NPC_Healthbar"] = true; 
-    ["NPC_Health_Mode"] = "Two Tone";
-    ["NPC_Health_High"] = { Color = rgb(0, 255, 0) };
-    ["NPC_Health_Low"] = { Color = rgb(255, 0, 0) };
-    ["NPC_Distance"] = true;
-    ["NPC_Weapon"] = true;
-    ["NPC_Skeletons"] = true;
-    ["NPC_Skeletons_Color"] = { Color = rgb(255, 255, 255) };
-    ["NPC_Distance_Color"] = { Color = rgb(255, 255, 255) };
-    ["NPC_Weapon_Color"] = { Color = rgb(255, 255, 255) }
-}
-
-local fonts = {}; do
-    function Register_Font(Name, Weight, Style, Asset)
-        if not isfile(Asset.Id) then
-            writefile(Asset.Id, Asset.Font)
-        end
-
-        if isfile(Name .. ".font") then
-            delfile(Name .. ".font")
-        end
-
-        local Data = {
-            name = Name,
-            faces = {
-                {
-                    name = "Normal",
-                    weight = Weight,
-                    style = Style,
-                    assetId = getcustomasset(Asset.Id),
-                },
-            },
+        Enemy = {
+            Box        = { Enabled = false, Type = "Regular", Color = Color3.fromRGB(255, 255, 255) },
+            BoxFill    = { Enabled = false, Type = "Solid", Color = Color3.fromRGB(255, 255, 255), Color2 = Color3.fromRGB(0, 0, 0), Rotation = 90, Transparency = 0.5 },
+            HealthBar  = { Enabled = false, Mode = "Two Tone", ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
+            Name       = { Enabled = false, Color = Color3.fromRGB(255, 255, 255) },
+            Distance   = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(255, 0, 0) }
+        },
+        Team = {
+            Box        = { Enabled = false, Type = "Regular", Color = Color3.fromRGB(0, 255, 0) },
+            BoxFill    = { Enabled = false, Type = "Solid", Color = Color3.fromRGB(255, 255, 255), Color2 = Color3.fromRGB(0, 0, 0), Rotation = 90, Transparency = 0.5 },
+            HealthBar  = { Enabled = false, Mode = "Two Tone", ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
+            Name       = { Enabled = false, Color = Color3.fromRGB(0, 255, 0) },
+            Distance   = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(0, 255, 0) }
+        },
+        NPC = {
+            Box        = { Enabled = false, Type = "Regular", Color = Color3.fromRGB(255, 150, 0) },
+            BoxFill    = { Enabled = false, Type = "Solid", Color = Color3.fromRGB(255, 255, 255), Color2 = Color3.fromRGB(0, 0, 0), Rotation = 90, Transparency = 0.5 },
+            HealthBar  = { Enabled = false, Mode = "Two Tone", ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
+            Name       = { Enabled = false, Color = Color3.fromRGB(255, 150, 0) },
+            Distance   = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(255, 150, 0) }
         }
-        writefile(Name .. ".font", http_service:JSONEncode(Data))
-
-        return getcustomasset(Name .. ".font");
-    end
-    
-    local ProggyTiny = Register_Font("adwdawdwadadwadawdawdawdawd!", 100, "Normal", {
-        Id = "ProggyTinyyyy.ttf",
-        Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyTiny.ttf"),
-    })
-
-    fonts = {
-        main = Font.new(ProggyTiny, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
-    }
-end
-
-local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cache = Instance.new("ScreenGui", gethui()), connections = {}}; do 
-    esp.screengui.IgnoreGuiInset = true
-    esp.screengui.Name = "\0"
-
-    esp.cache.Enabled = false
-
-    -- Functions 
-        function esp:get_screen_pos(world_position)
-            local viewport_size = camera.ViewportSize
-            local local_position = camera.CFrame:pointToObjectSpace(world_position) 
-            
-            local aspect_ratio = viewport_size.x / viewport_size.y
-            local half_height = -local_position.z * math.tan(math.rad(camera.FieldOfView / 2))
-            local half_width = aspect_ratio * half_height
-            
-            local far_plane_corner = Vector3.new(-half_width, half_height, local_position.z)
-            local relative_position = local_position - far_plane_corner
-        
-            local screen_x = relative_position.x / (half_width * 2)
-            local screen_y = -relative_position.y / (half_height * 2)
-        
-            local is_on_screen = -local_position.z > 0 and screen_x >= 0 and screen_x <= 1 and screen_y >= 0 and screen_y <= 1
-            
-            -- returns in pixels as opposed to scale
-            return Vector3.new(screen_x * viewport_size.x, screen_y * viewport_size.y, -local_position.z), is_on_screen
-        end
-
-        function esp:box_solve(torso)
-            if not torso then
-                return nil, nil, nil
-            end
-            
-            local ViewportTop = torso.Position + (torso.CFrame.UpVector * 1.8) + camera.CFrame.UpVector
-            local ViewportBottom = torso.Position - (torso.CFrame.UpVector * 2.5) - camera.CFrame.UpVector
-            local Distance = (torso.Position - camera.CFrame.p).Magnitude
-
-            local Top, TopIsRendered = esp:get_screen_pos(ViewportTop)
-            local Bottom, BottomIsRendered = esp:get_screen_pos(ViewportBottom)
-
-            local Width = math.max(math.floor(math.abs(Top.X - Bottom.X)), 3)
-            local Height = math.max(math.floor(math.max(math.abs(Bottom.Y - Top.Y), Width / 2)), 3)
-            local BoxSize = Vector2.new(math.floor(math.max(Height / 1.5, Width)), Height)
-            local BoxPosition = Vector2.new(math.floor(Top.X * 0.5 + Bottom.X * 0.5 - BoxSize.X * 0.5), math.floor(math.min(Top.Y, Bottom.Y)))
-            
-            return BoxSize, BoxPosition, TopIsRendered, Distance
-            
-        end
-
-        function esp:create(instance, options)
-            local ins = Instance.new(instance) 
-            
-            for prop, value in options do 
-                ins[prop] = value
-            end
-            
-            return ins 
-        end
-
-        function esp:create_object( entity, is_npc )
-            esp[ entity ] = { objects = { }, info = {character = is_npc and entity or nil; humanoid = nil; is_npc = is_npc}; drawings = { }} 
-            local data = esp[ entity ] 
-
-            local objects = data.objects; do
-                objects[ "holder" ] = esp:create( "Frame" , {
-                    Parent = esp.screengui;
-                    Name = "\0";
-                    BackgroundTransparency = 1;
-                    Position = dim2(0, 0, 0, 0);
-                    BorderColor3 = rgb(0, 0, 0);
-                    Size = dim2(0, 0, 0, 0);
-                    BorderSizePixel = 0;
-                    BackgroundColor3 = rgb(255, 255, 255)
-                });
-                
-                objects[ "box_outline" ] = esp:create( "UIStroke" , {
-                    Parent = (flags["Boxes"] and flags["Box_Type"] ~= "Corner" and objects["holder"]) or esp.cache;
-                    LineJoinMode = Enum.LineJoinMode.Miter
-                });
-                
-                objects[ "name" ] = esp:create( "TextLabel" , {
-                    FontFace = fonts.main;
-                    Parent = objects[ "holder" ];
-                    TextColor3 = flags["Name_Color"].Color;
-                    BorderColor3 = rgb(0, 0, 0);
-                    Text = is_npc and "NPC" or string.format("%s (@%s)", entity.DisplayName, entity.Name);
-                    Name = "\0";
-                    TextStrokeTransparency = 0;
-                    AnchorPoint = vec2(0, 1);
-                    Size = dim2(1, 0, 0, 0);
-                    BackgroundTransparency = 1;
-                    Position = dim2(0, 0, 0, -5);
-                    BorderSizePixel = 0;
-                    AutomaticSize = Enum.AutomaticSize.Y;
-                    TextSize = 9;
-                });
-                
-                objects[ "box_handler" ] = esp:create( "Frame" , {
-                    Parent = (flags["Boxes"] and flags["Box_Type"] ~= "Corner" and objects["holder"]) or esp.cache;
-                    Name = "\0";
-                    BackgroundTransparency = 1;
-                    Position = dim2(0, 1, 0, 1);
-                    BorderColor3 = rgb(0, 0, 0);
-                    Size = dim2(1, -2, 1, -2);
-                    BorderSizePixel = 0;
-                    BackgroundColor3 = rgb(255, 255, 255)
-                });
-                
-                objects[ "box_color" ] = esp:create( "UIStroke" , {
-                    Color = rgb(255, 255, 255);
-                    LineJoinMode = Enum.LineJoinMode.Miter;
-                    Name = "\0";
-                    Parent = objects[ "box_handler" ]
-                });
-                
-                objects[ "outline" ] = esp:create( "Frame" , {
-                    Parent = objects[ "box_handler" ];
-                    Name = "\0";
-                    BackgroundTransparency = 1;
-                    Position = dim2(0, 1, 0, 1);
-                    BorderColor3 = rgb(0, 0, 0);
-                    Size = dim2(1, -2, 1, -2);
-                    BorderSizePixel = 0;
-                    BackgroundColor3 = rgb(255, 255, 255)
-                });
-                
-                esp:create( "UIStroke" , {
-                    Parent = objects[ "outline" ];
-                    LineJoinMode = Enum.LineJoinMode.Miter
-                });  
-                
-                -- Box Fill
-                objects[ "fill" ] = esp:create( "Frame" , {
-                    Parent = esp.cache;
-                    Name = "\0";
-                    BackgroundTransparency = 0.5;
-                    Position = dim2(0, 1, 0, 1);
-                    BorderColor3 = rgb(0, 0, 0);
-                    Size = dim2(1, -2, 1, -2);
-                    BorderSizePixel = 0;
-                    BackgroundColor3 = rgb(255, 255, 255)
-                });
-                objects[ "fill_gradient" ] = esp:create( "UIGradient" , {
-                    Parent = esp.cache;
-                    Color = ColorSequence.new(rgb(255, 255, 255), rgb(0, 0, 0));
-                    Rotation = 90;
-                });
-                --
-                
-                -- Corner Boxes
-                    objects[ "corners" ] = esp:create( "Frame" , {
-                        Visible = true;
-                        BorderColor3 = rgb(0, 0, 0);
-                        Parent = flags["Boxes"] and flags["Box_Type"] == "Corner" and objects["holder"] or esp.cache;
-                        BackgroundTransparency = 1;
-                        Position = dim2(0, -1, 0, 2);
-                        Name = "\0";
-                        Size = dim2(1, 0, 1, 0);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(255, 255, 255)
-                    });
-
-                    objects[ "1" ] = esp:create( "Frame" , {
-                        Parent = objects[ "corners" ];
-                        Name = "line";
-                        Position = dim2(0, 0, 0, -2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0.2, 0, 0, 3);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    esp:create( "Frame" , {
-                        Parent = objects[ "1" ];
-                        Position = dim2(0, 1, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, -2);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = flags["Box_Color"].Color
-                    });
-                    
-                    objects[ "2" ] = esp:create( "Frame" , {
-                        Parent = objects[ "corners" ];
-                        Name = "line";
-                        Position = dim2(0, 0, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 3, 0.2, 0);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    esp:create( "Frame" , {
-                        Parent = objects[ "2" ];
-                        Position = dim2(0, 1, 0, -2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, 1);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = flags["Box_Color"].Color
-                    });
-                    
-                    objects[ "3" ] = esp:create( "Frame" , {
-                        AnchorPoint = vec2(1, 0);
-                        Parent = objects[ "corners" ];
-                        Name = "line";
-                        Position = dim2(1, 0, 0, -2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0.2, 0, 0, 3);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    esp:create( "Frame" , {
-                        Parent = objects[ "3" ];
-                        Position = dim2(0, 1, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, -2);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = flags["Box_Color"].Color
-                    });
-                    
-                    objects[ "4" ] = esp:create( "Frame" , {
-                        AnchorPoint = vec2(1, 0);
-                        Parent = objects[ "corners" ];
-                        Name = "line";
-                        Position = dim2(1, 0, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 3, 0.2, 0);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    esp:create( "Frame" , {
-                        Parent = objects[ "4" ];
-                        Position = dim2(0, 1, 0, -2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, 1);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = flags["Box_Color"].Color
-                    });
-                    
-                    objects[ "5" ] = esp:create( "Frame" , {
-                        AnchorPoint = vec2(0, 1);
-                        Parent = objects[ "corners" ];
-                        Name = "line";
-                        Position = dim2(0, 0, 1, -2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0.2, 0, 0, 3);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    esp:create( "Frame" , {
-                        Parent = objects[ "5" ];
-                        Position = dim2(0, 1, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, -2);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = flags["Box_Color"].Color
-                    });
-                    
-                    objects[ "6" ] = esp:create( "Frame" , {
-                        BorderColor3 = rgb(0, 0, 0);
-                        Rotation = 180;
-                        Parent = objects[ "corners" ];
-                        Name = "line";
-                        Position = dim2(0, 0, 1, -5);
-                        AnchorPoint = vec2(0, 1);
-                        Size = dim2(0, 3, 0.2, 0);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    esp:create( "Frame" , {
-                        Parent = objects[ "6" ];
-                        Position = dim2(0, 1, 0, -2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, 1);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = flags["Box_Color"].Color
-                    });
-                    
-                    objects[ "7" ] = esp:create( "Frame" , {
-                        AnchorPoint = vec2(1, 1);
-                        Parent = objects[ "corners" ];
-                        Name = "line";
-                        Position = dim2(1, 0, 1, -2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0.2, 0, 0, 3);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    esp:create( "Frame" , {
-                        Parent = objects[ "7" ];
-                        Position = dim2(0, 1, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, -2);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = flags["Box_Color"].Color
-                    });
-                    
-                    objects[ "7" ] = esp:create( "Frame" , {
-                        BorderColor3 = rgb(0, 0, 0);
-                        Rotation = 180;
-                        Parent = objects[ "corners" ];
-                        Name = "line";
-                        Position = dim2(1, 0, 1, -5);
-                        AnchorPoint = vec2(1, 1);
-                        Size = dim2(0, 3, 0.2, 0);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    esp:create( "Frame" , {
-                        Parent = objects[ "7" ];
-                        Position = dim2(0, 1, 0, -2);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, 1);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = flags["Box_Color"].Color
-                    });
-                -- 
-                
-                -- Healthbar
-                    objects[ "healthbar_holder" ] = esp:create( "Frame" , {
-                        AnchorPoint = vec2(1, 0);
-                        Parent = flags["Healthbar"] and objects[ "holder" ] or esp.cache;
-                        Name = "\0";
-                        Position = dim2(0, -5, 0, -1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 4, 1, 2);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(0, 0, 0)
-                    });
-                    
-                    objects[ "healthbar" ] = esp:create( "Frame" , {
-                        Parent = objects[ "healthbar_holder" ];
-                        Name = "\0";
-                        Position = dim2(0, 1, 0, 1);
-                        BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -2, 1, -2);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(255, 255, 255)
-                    });
-                    objects[ "healthbar_gradient" ] = esp:create( "UIGradient" , {
-                        Parent = esp.cache;
-                        Rotation = -90;
-                    });
-                -- 
-
-                -- Distance esp
-                    objects[ "distance" ] = esp:create( "TextLabel" , {
-                        FontFace = fonts.main;
-                        TextColor3 = flags["Distance_Color"].Color;
-                        BorderColor3 = rgb(0, 0, 0);
-                        Text = "127st";
-                        Parent = flags[ "Distance" ] and objects[ "holder" ] or esp.cache;
-                        TextStrokeTransparency = 0;
-                        Name = "\0";
-                        Size = dim2(1, 0, 0, 0);
-                        BackgroundTransparency = 1;
-                        Position = dim2(0, 0, 1, 5);
-                        BorderSizePixel = 0;
-                        AutomaticSize = Enum.AutomaticSize.Y;
-                        TextSize = 9;
-                    });                
-                -- 
-
-                -- Weapon esp
-                    objects[ "weapon" ] = esp:create( "TextLabel" , {
-                        FontFace = fonts.main;
-                        TextColor3 = flags["Weapon_Color"].Color;
-                        BorderColor3 = rgb(0, 0, 0);
-                        Text = "[ak-47]";
-                        Parent = esp.cache;
-                        TextStrokeTransparency = 0;
-                        Name = "\0";
-                        Size = dim2(1, 0, 0, 0);
-                        BackgroundTransparency = 1;
-                        Position = dim2(0, 0, 1, 19);
-                        BorderSizePixel = 0;
-                        AutomaticSize = Enum.AutomaticSize.Y;
-                        TextSize = 9;
-                    });
-                -- 
-                
-                -- Skeleton Lines
-                    
-                    for _, bone in bones do
-                        local line = Drawing.new("Line")
-                        line.Color = flags["Skeletons_Color"].Color;
-                        line.Thickness = 1;
-                        line.Visible = false;
-
-                        data.drawings[#data.drawings + 1] = line;
-                    end
-                -- 
-            end
-            
-            do --[[ data functions ]]
-                data.health_changed = function( value )
-                    local prefix = data.info.is_npc and "NPC_" or ""
-                    if not flags[ prefix .. "Healthbar" ] then 
-                        return 
-                    end
-
-                    local humanoid = data.info.humanoid
-                    local multiplier = value / humanoid.MaxHealth
-                    local mode = flags[ prefix .. "Health_Mode" ] or "Two Tone"
-                    
-                    objects[ "healthbar" ].Size = UDim2.new(1, -2, multiplier, -2)
-                    objects[ "healthbar" ].Position = UDim2.new(0, 1, 1 - multiplier, 1)
-
-                    if mode == "Solid" then
-                        objects[ "healthbar" ].BackgroundColor3 = flags[ prefix .. "Health_High" ].Color
-                    elseif mode == "Gradient" then
-                        objects[ "healthbar" ].BackgroundColor3 = rgb(255, 255, 255)
-                    else
-                        local color = flags[ prefix .. "Health_Low" ].Color:Lerp( flags[ prefix .. "Health_High" ].Color, multiplier )
-                        objects[ "healthbar" ].BackgroundColor3 = color
-                    end
-                end
-
-                data.tool_added = function( item )
-                    if not item:IsA("Tool") then 
-                        return 
-                    end 
-
-                    local exists = data.info.character:FindFirstChild(item.Name) 
-                    print(exists, item.Name)
-                    objects[ "weapon" ].Text = item.Name
-                    objects[ "weapon" ].Parent = exists and objects[ "holder" ] or esp.cache
-                end
-
-                data.refresh_offsets = function()
-                    local offset = 5; 
-
-                    if objects["distance"].Parent == objects[ "holder" ] then 
-                        offset += 5
-                        objects[ "weapon" ].Position = dim2(0, 0, 1, offset)
-                    end 
-
-                    if objects[ "weapon" ].Parent == objects[ "holder" ] then 
-                        offset += 5
-                        objects[ "weapon" ].Position = dim2(0, 0, 1, offset)
-                    end 
-                end 
-
-                data.refresh_descendants = function() 
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local humanoid = character:WaitForChild( "Humanoid" )
-                    
-                    data.info.character = character
-                    data.info.humanoid = humanoid
-                    data.info.rootpart = rootpart
-
-                    humanoid.HealthChanged:Connect( data.health_changed )
-
-                    character.ChildAdded:Connect( data.tool_added )
-                    character.ChildRemoved:Connect( data.tool_added )
-
-                    data.health_changed( data.info.humanoid.Health )
-                end
-            end 
-            
-            do --[[ init / connections ]]  
-                data.refresh_descendants()
-
-                data.health_changed( data.info.humanoid.Health )
-
-                player.CharacterAdded:Connect( data.refresh_descendants )
-
-                local tool = player.Character:FindFirstChildOfClass("Tool")
-
-                if tool then
-                    data.tool_added( tool )
-                end 
-            end 
-        end
-
-        function esp:remove_object(entity)
-            local holder = esp[entity]
-
-            if not holder then return end 
-
-            local objects = holder.objects
- 
-            for _, line in holder.drawings do 
-                line:Remove()
-            end
-            
-            objects[ "holder" ]:Destroy() 
-            esp[entity] = nil
-        end
-        
-        function esp.refresh_elements( )
-            for entity, path in pairs(esp) do
-                if type(entity) == "string" or type(path) ~= "table" or not path.objects then continue end
-
-                local is_npc = path.info and path.info.is_npc
-                local prefix = is_npc and "NPC_" or ""
-                
-                if not is_npc and entity == players.LocalPlayer then continue end
-                
-                if not path.info.character then continue end
-
-                local objects = path.objects
-                
-                objects.holder.Parent = flags[prefix .. "Enabled"] and esp.screengui or esp.cache
-
-                objects[ "name" ].Parent = flags[prefix .. "Names"] and objects["holder"] or esp.cache
-                objects[ "name" ].TextColor3 = flags[prefix .. "Name_Color"].Color
-                
-                local name_type = flags[prefix .. "Name_Type"] or "Both"
-                local name_text = ""
-                if is_npc then
-                    name_text = "NPC"
-                elseif name_type == "Username" then
-                    name_text = entity.Name
-                elseif name_type == "Display Name" then
-                    name_text = entity.DisplayName
-                else
-                    name_text = string.format("%s (@%s)", entity.DisplayName, entity.Name)
-                end
-                
-                if objects["name"].Text ~= name_text then
-                    objects["name"].Text = name_text
-                end
-                
-                local is_corner = flags[ prefix .. "Box_Type" ] == "Corner"
-
-                if flags[prefix .. "Boxes"] then 
-                    objects[ "corners" ].Parent = (is_corner and objects["holder"]) or esp.cache
-                    objects[ "box_handler" ].Parent = (is_corner and esp.cache or objects[ "holder" ])
-                    objects[ "box_outline" ].Parent = (is_corner and esp.cache or objects[ "holder" ]) 
-                else
-                    objects[ "corners" ].Parent =  esp.cache
-                    objects[ "box_handler" ].Parent = esp.cache
-                    objects[ "box_outline" ].Parent = esp.cache
-                end 
-                
-                objects[ "box_color" ].Color = flags[prefix .. "Box_Color"].Color 
-
-                for _, corner in objects[ "corners" ]:GetChildren() do
-                    corner.Frame.BackgroundColor3 = flags[prefix .. "Box_Color"].Color
-                end
-
-                if flags[prefix .. "Box_Fill"] and flags[prefix .. "Boxes"] then
-                    objects["fill"].Parent = objects["holder"]
-                    objects["fill"].BackgroundTransparency = flags[prefix .. "Box_Fill_Transparency"]
-                    
-                    if flags[prefix .. "Box_Fill_Type"] == "Gradient" then
-                        objects["fill"].BackgroundColor3 = rgb(255, 255, 255)
-                        objects["fill_gradient"].Parent = objects["fill"]
-                        objects["fill_gradient"].Color = ColorSequence.new(flags[prefix .. "Box_Fill_Color"].Color, flags[prefix .. "Box_Fill_Color2"].Color)
-                        objects["fill_gradient"].Rotation = flags[prefix .. "Box_Fill_Gradient_Rotation"]
-                    else
-                        objects["fill"].BackgroundColor3 = flags[prefix .. "Box_Fill_Color"].Color
-                        objects["fill_gradient"].Parent = esp.cache
-                    end
-                else
-                    objects["fill"].Parent = esp.cache
-                end
-
-                for _, line in path.drawings do
-                    line.Color = flags[prefix .. "Skeletons_Color"].Color
-                    line.Visible = flags[prefix .. "Skeletons"]
-                end
-
-                objects[ "healthbar_holder" ].Parent = flags[ prefix .. "Healthbar" ] and objects[ "holder" ] or esp.cache
-                if flags[prefix .. "Healthbar"] and path.info and path.info.humanoid then
-                    path.health_changed(path.info.humanoid.Health)
-                    
-                    if flags[ prefix .. "Health_Mode" ] == "Gradient" then
-                        objects[ "healthbar_gradient" ].Parent = objects[ "healthbar" ]
-                        objects[ "healthbar_gradient" ].Color = ColorSequence.new(flags[ prefix .. "Health_High" ].Color, flags[ prefix .. "Health_Low" ].Color)
-                    else
-                        objects[ "healthbar_gradient" ].Parent = esp.cache
-                    end
-                end
-                
-                objects[ "weapon" ].TextColor3 = flags[prefix .. "Weapon_Color"].Color
-                local tool = path.info.character:FindFirstChildOfClass("Tool")
-                objects[ "weapon" ].Parent = flags[prefix .. "Weapon"] and tool and objects[ "holder" ] or esp.cache
-
-                objects[ "distance" ].TextColor3 = flags[prefix .. "Distance_Color"].Color
-                objects[ "distance" ].Parent = flags[prefix .. "Distance"] and objects[ "holder" ] or esp.cache
-            end
-        end
-
-        esp.connection = run.RenderStepped:Connect(function()
-            for entity, data in pairs(esp) do 
-                if type(entity) == "string" or type(data) ~= "table" or not data.objects then continue end
-
-                local is_npc = data.info and data.info.is_npc
-                local prefix = is_npc and "NPC_" or ""
-
-                if not flags[prefix .. "Enabled"] then 
-                    data.objects.holder.Visible = false
-                    continue
-                end
-
-                local character = data.info.character
-                local humanoid = data.info.humanoid 
-                
-                if not (character or humanoid) then 
-                    continue 
-                end 
-
-                local objects = data.objects 
-
-                local box_size, box_pos, on_screen, distance = esp:box_solve(humanoid.RootPart)
-                local holder = objects[ "holder" ]
-
-                if holder.Visible ~= on_screen then 
-                    holder.Visible = on_screen
-                end 
-
-                -- Skeletons 
-                local show_skeletons = flags[prefix .. "Skeletons"] and character:FindFirstChild("UpperTorso")
-                
-                for i = 1, #bones do
-                    local path = data.drawings[i]
-                    if not path then 
-                        continue  
-                    end 
-
-                    if show_skeletons then
-                        local origin, destination = bones[i][1], bones[i][2]
-
-                        local origin_3d = character:FindFirstChild(origin) 
-                        local destination_3d = character:FindFirstChild(destination) 
-
-                        if origin_3d and destination_3d then 
-                            local origin_2d, on_screen_start = esp:get_screen_pos(origin_3d.Position)
-                            local destination_2d, on_screen_end = esp:get_screen_pos(destination_3d.Position)
-                            
-                            if on_screen_start and on_screen_end then 
-                                if not path.Visible then
-                                    path.Visible = true
-                                end
-                                
-                                local from = vec2(origin_2d.X, origin_2d.Y)
-                                local to = vec2(destination_2d.X, destination_2d.Y)
-                                
-                                if path.From ~= from then path.From = from end
-                                if path.To ~= to then path.To = to end
-                                
-                                continue -- Successfully rendered this bone, move to next
-                            end 
-                        end
-                    end 
-                    
-                    -- If any condition above failed, or drawing shouldn't be shown, conceal it safely
-                    if path.Visible then
-                        path.Visible = false
-                    end
-                end 
-                -- 
-
-                if not on_screen then
-                    continue
-                end 
-                
-                local pos = dim_offset(box_pos.X, box_pos.Y) -- silly sanity check
-                if pos ~= holder.Position then 
-                    holder.Position = dim_offset(box_pos.X, box_pos.Y)
-                end 
-
-                local size = dim_offset(box_size.X, box_size.Y) -- more silly sanity checks
-                if size ~= holder.Size then 
-                    holder.Size = size
-                end 
-
-                local distance_label = objects[ "distance" ]
-                if distance_label.Text ~= tostring( math.round(distance) )  .. "st" then 
-                    distance_label.Text = tostring( math.round(distance) ) .. "st"
-                end 
-
-            end
-        end)
-
-        function esp:unload() 
-            for entity, data in pairs(esp) do 
-                if type(entity) ~= "string" and type(data) == "table" and data.objects then
-                    esp:remove_object(entity)
-                end
-            end 
-
-            esp.connection:Disconnect() 
-            esp.player_added:Disconnect() 
-            esp.player_removed:Disconnect() 
-            if esp.npc_added then esp.npc_added:Disconnect() end
-            if esp.npc_removed then esp.npc_removed:Disconnect() end 
-
-            esp.cache:Destroy() 
-            esp.screengui:Destroy()
-
-            esp = nil
-        end 
-    -- 
-end
-
--- Load existing players
-for _,v in players:GetPlayers() do 
-    if v ~= players.LocalPlayer then 
-        esp:create_object(v)
-    end 
-end 
-
-esp.player_added = players.PlayerAdded:Connect(function(v)
-    esp:create_object(v)
-end)
-
-esp.player_removed = players.PlayerRemoving:Connect(function(v)
-    esp:remove_object(v)
-end)
-
--- Load existing NPCs
-local enemies_folder = workspace:FindFirstChild("Spawned") and workspace.Spawned:FindFirstChild("Enemies")
-if enemies_folder then
-    for _, v in enemies_folder:GetChildren() do
-        if v:IsA("Model") then
-            esp:create_object(v, true)
-        end
-    end
-
-    esp.npc_added = enemies_folder.ChildAdded:Connect(function(v)
-        if v:IsA("Model") then
-            esp:create_object(v, true)
-        end
-    end)
-
-    esp.npc_removed = enemies_folder.ChildRemoved:Connect(function(v)
-        if v:IsA("Model") then
-            esp:remove_object(v)
-        end
-    end)
-end
-
-task.wait()
-esp.refresh_elements()
-
-return {
-    flags = flags,
-    refresh_elements = function() esp.refresh_elements() end
+    },
+    Cache = {},
+    Connections = {},
+    ScreenGui = Instance.new("ScreenGui")
 }
+
+local coreGui = game:GetService("CoreGui")
+ESP.ScreenGui.Name = "ESP_Hybrid_Layer"
+ESP.ScreenGui.Parent = coreGui:FindFirstChild("RobloxGui") or coreGui
+
+-- Drawing helper
+local function Draw(class, props)
+    local obj = Drawing.new(class)
+    for k, v in pairs(props or {}) do obj[k] = v end
+    return obj
+end
+
+-- Create cached drawing objects for a player
+function ESP:Add(Entity, isNPC)
+    if Entity == LocalPlayer then return end
+
+    local cache = {
+        IsNPC = isNPC,
+        -- Box: outline (black border) → inline (colored)
+        BoxOutline  = Draw("Square", { Thickness = 3, Filled = false, Color = Color3.new(0, 0, 0), ZIndex = 1 }),
+        Box         = Draw("Square", { Thickness = 1, Filled = false, ZIndex = 2 }),
+
+        -- Corner lines (8 lines)
+        Corners = {},
+
+        -- Health bar: outline (black border) → background (dark fill) → bar (colored fill)
+        HealthOutline = Draw("Square", { Filled = true, Color = Color3.new(0, 0, 0), ZIndex = 1 }),
+        HealthBG      = Draw("Square", { Filled = true, Color = Color3.fromRGB(40, 40, 40), ZIndex = 2 }),
+        HealthBar     = Draw("Square", { Filled = true, ZIndex = 3 }),
+
+        -- Text layers
+        Name     = Draw("Text", { Center = true, Outline = true, ZIndex = 4 }),
+        Distance = Draw("Text", { Center = true, Outline = true, ZIndex = 4 }),
+        Weapon   = Draw("Text", { Center = true, Outline = true, ZIndex = 4 }),
+
+        -- Off-screen arrow
+        Arrow = Draw("Triangle", { Filled = true, ZIndex = 3 }),
+
+        -- GUI Elements
+        GUI = {}
+    }
+
+    for i = 1, 8 do
+        cache.Corners[i] = Draw("Line", { Thickness = 1, ZIndex = 2 })
+        cache.Corners[i .. "_outline"] = Draw("Line", { Thickness = 3, Color = Color3.new(0,0,0), ZIndex = 1 })
+    end
+
+    local fillFrame = Instance.new("Frame")
+    fillFrame.BorderSizePixel = 0
+    fillFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    fillFrame.Visible = false
+    fillFrame.Parent = self.ScreenGui
+    cache.GUI.Fill = fillFrame
+
+    local fillGrad = Instance.new("UIGradient")
+    fillGrad.Parent = fillFrame
+    cache.GUI.FillGrad = fillGrad
+
+    local healthGradFrame = Instance.new("Frame")
+    healthGradFrame.BorderSizePixel = 0
+    healthGradFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    healthGradFrame.Visible = false
+    healthGradFrame.Parent = self.ScreenGui
+    cache.GUI.HealthGradFrame = healthGradFrame
+
+    local healthGrad = Instance.new("UIGradient")
+    healthGrad.Rotation = -90
+    healthGrad.Parent = healthGradFrame
+    cache.GUI.HealthGrad = healthGrad
+
+    self.Cache[Entity] = cache
+end
+
+-- Clean up drawings
+function ESP:Remove(Entity)
+    local cache = self.Cache[Entity]
+    if not cache then return end
+    for k, obj in pairs(cache) do 
+        if type(obj) == "table" and k == "Corners" then
+            for _, line in pairs(obj) do line:Remove() end
+        elseif type(obj) == "table" and k == "GUI" then
+            for _, gui in pairs(obj) do gui:Destroy() end
+        elseif type(obj) ~= "boolean" then 
+            obj:Remove() 
+        end
+    end
+    self.Cache[Entity] = nil
+end
+
+-- Hot-reload safe teardown
+function ESP:Unload()
+    for _, c in pairs(self.Connections) do c:Disconnect() end
+    for entity in pairs(self.Cache) do self:Remove(entity) end
+    if self.ScreenGui then self.ScreenGui:Destroy() end
+end
+
+-- Hide all drawings for a player
+local function HideAll(objs)
+    for k, obj in pairs(objs) do 
+        if type(obj) == "table" and k == "Corners" then
+            for _, line in pairs(obj) do line.Visible = false end
+        elseif type(obj) == "table" and k == "GUI" then
+            for _, gui in pairs(obj) do 
+                if gui:IsA("Frame") then gui.Visible = false end
+            end
+        elseif type(obj) ~= "boolean" then
+            obj.Visible = false 
+        end
+    end
+end
+
+-- Main render loop
+function ESP:Update()
+    Camera = workspace.CurrentCamera -- refresh in case of respawn
+
+    for entity, objs in pairs(self.Cache) do
+        local character
+        if objs.IsNPC then
+            character = entity
+        else
+            character = entity.Character
+        end
+        local humanoid  = character and character:FindFirstChild("Humanoid")
+        local hrp       = character and character:FindFirstChild("HumanoidRootPart")
+        local head      = character and character:FindFirstChild("Head")
+
+        local config
+        if objs.IsNPC then
+            config = self.Settings.NPC
+        else
+            local isTeammate = entity.Team ~= nil and entity.Team == LocalPlayer.Team
+            config = isTeammate and self.Settings.Team or self.Settings.Enemy
+            if self.Settings.TeamCheck and isTeammate then 
+                -- handled via validity checks
+            end
+        end
+
+        -- Validity checks
+        local alive = humanoid and humanoid.Health > 0
+        local pass  = self.Settings.Enabled and character and alive and hrp and head
+        if not objs.IsNPC and self.Settings.TeamCheck and entity.Team == LocalPlayer.Team then pass = false end
+
+        local dist = 0
+        if pass then
+            local localChar = LocalPlayer.Character
+            local localHRP = localChar and localChar:FindFirstChild("HumanoidRootPart")
+            dist = localHRP and (hrp.Position - localHRP.Position).Magnitude or (hrp.Position - Camera.CFrame.Position).Magnitude
+            if dist > self.Settings.MaxDistance then pass = false end
+        end
+
+        if not pass then
+            HideAll(objs)
+            -- Still try OOF arrow even if off-screen
+            if self.Settings.Enabled and alive and hrp and config.OOF.Enabled then
+                local _, vis = Camera:WorldToViewportPoint(hrp.Position)
+                if not vis then
+                    -- render OOF arrow below
+                    local proj = Camera.CFrame:PointToObjectSpace(hrp.Position)
+                    local ang  = atan2(proj.Z, proj.X)
+                    local dir  = V2(cos(ang), sin(ang))
+                    local center = Camera.ViewportSize / 2
+                    local tip = center + dir * config.OOF.Radius
+                    local sz  = config.OOF.Size
+                    local function rot(v, r) return V2(cos(r)*v.X - sin(r)*v.Y, sin(r)*v.X + cos(r)*v.Y) end
+                    objs.Arrow.PointA = tip
+                    objs.Arrow.PointB = tip - rot(dir, rad(25)) * sz
+                    objs.Arrow.PointC = tip - rot(dir, -rad(25)) * sz
+                    objs.Arrow.Color  = config.OOF.Color
+                    objs.Arrow.Visible = true
+                end
+            end
+            continue
+        end
+
+        -- World-to-screen projection for bounding box
+        local _, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+
+        -- OOF arrow when off-screen
+        if not onScreen then
+            HideAll(objs)
+            if config.OOF.Enabled then
+                local proj = Camera.CFrame:PointToObjectSpace(hrp.Position)
+                local ang  = atan2(proj.Z, proj.X)
+                local dir  = V2(cos(ang), sin(ang))
+                local center = Camera.ViewportSize / 2
+                local tip = center + dir * config.OOF.Radius
+                local sz  = config.OOF.Size
+                local function rot(v, r) return V2(cos(r)*v.X - sin(r)*v.Y, sin(r)*v.X + cos(r)*v.Y) end
+                objs.Arrow.PointA = tip
+                objs.Arrow.PointB = tip - rot(dir, rad(25)) * sz
+                objs.Arrow.PointC = tip - rot(dir, -rad(25)) * sz
+                objs.Arrow.Color  = config.OOF.Color
+                objs.Arrow.Visible = true
+            end
+            continue
+        end
+
+        objs.Arrow.Visible = false
+
+        --------------------------------------------------
+        -- Bounding Box Calculation (FOV-based scale)
+        --------------------------------------------------
+        local rootPos = Camera:WorldToViewportPoint(hrp.Position)
+        local scale = 1 / (rootPos.Z * math.tan(rad(Camera.FieldOfView * 0.5)) * 2) * 1000
+        local boxW = floor(4.5 * scale)
+        local boxH = floor(6 * scale)
+        local scrX = floor(rootPos.X)
+        local scrY = floor(rootPos.Y)
+        local boxX = floor(scrX - boxW * 0.5)
+        local boxY = floor((scrY - boxH * 0.5) + (0.5 * scale))
+
+        local boxPos  = V2(boxX, boxY)
+        local boxSize = V2(boxW, boxH)
+
+        local healthPct = clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+
+        --------------------------------------------------
+        -- Box (outline + inline, 1px each) + Corners + Fill
+        --------------------------------------------------
+        if config.Box.Enabled then
+            if config.Box.Type == "Corner" then
+                objs.Box.Visible = false
+                objs.BoxOutline.Visible = false
+                local cornerLen = floor(boxW * 0.2)
+                local cornerH = floor(boxH * 0.2)
+                
+                local c = objs.Corners
+                for i=1,8 do c[i].Visible = true; c[i.."_outline"].Visible = true end
+                
+                -- Top Left
+                c[1].From = V2(boxX, boxY); c[1].To = V2(boxX + cornerLen, boxY)
+                c[2].From = V2(boxX, boxY); c[2].To = V2(boxX, boxY + cornerH)
+                
+                -- Top Right
+                c[3].From = V2(boxX + boxW, boxY); c[3].To = V2(boxX + boxW - cornerLen, boxY)
+                c[4].From = V2(boxX + boxW, boxY); c[4].To = V2(boxX + boxW, boxY + cornerH)
+                
+                -- Bottom Left
+                c[5].From = V2(boxX, boxY + boxH); c[5].To = V2(boxX + cornerLen, boxY + boxH)
+                c[6].From = V2(boxX, boxY + boxH); c[6].To = V2(boxX, boxY + boxH - cornerH)
+                
+                -- Bottom Right
+                c[7].From = V2(boxX + boxW, boxY + boxH); c[7].To = V2(boxX + boxW - cornerLen, boxY + boxH)
+                c[8].From = V2(boxX + boxW, boxY + boxH); c[8].To = V2(boxX + boxW, boxY + boxH - cornerH)
+
+                for i=1,8 do
+                    c[i].Color = config.Box.Color
+                    c[i.."_outline"].From = c[i].From
+                    c[i.."_outline"].To = c[i].To
+                end
+            else
+                for i=1,8 do objs.Corners[i].Visible = false; objs.Corners[i.."_outline"].Visible = false end
+                objs.Box.Position  = boxPos
+                objs.Box.Size      = boxSize
+                objs.Box.Color     = config.Box.Color
+                objs.Box.Visible   = true
+
+                objs.BoxOutline.Position = boxPos
+                objs.BoxOutline.Size     = boxSize
+                objs.BoxOutline.Visible  = true
+            end
+        else
+            objs.Box.Visible = false
+            objs.BoxOutline.Visible = false
+            for i=1,8 do objs.Corners[i].Visible = false; objs.Corners[i.."_outline"].Visible = false end
+        end
+
+        if config.BoxFill.Enabled and config.Box.Enabled then
+            objs.GUI.Fill.Visible = true
+            objs.GUI.Fill.Position = UDim2.new(0, boxX, 0, boxY)
+            objs.GUI.Fill.Size = UDim2.new(0, boxW, 0, boxH)
+            objs.GUI.Fill.BackgroundTransparency = config.BoxFill.Transparency
+            
+            if config.BoxFill.Type == "Gradient" then
+                objs.GUI.Fill.BackgroundColor3 = Color3.new(1, 1, 1)
+                objs.GUI.FillGrad.Enabled = true
+                objs.GUI.FillGrad.Color = ColorSequence.new(config.BoxFill.Color, config.BoxFill.Color2)
+                objs.GUI.FillGrad.Rotation = config.BoxFill.Rotation
+            else
+                objs.GUI.Fill.BackgroundColor3 = config.BoxFill.Color
+                objs.GUI.FillGrad.Enabled = false
+            end
+        else
+            objs.GUI.Fill.Visible = false
+        end
+
+        --------------------------------------------------
+        -- Health Bar (left side, 2px wide, 1px gap from box)
+        -- Layout:  [outline 4px] > [bg 2px] > [bar 2px]
+        -- The bar grows upward from the bottom.
+        --------------------------------------------------
+        if config.HealthBar.Enabled then
+            local barW       = 2     -- bar fill width
+            local outlinePad = 1     -- padding around the bar
+            local gap        = 3     -- gap between box left edge and outline right edge
+
+            -- Outline (background border)
+            local olX = boxX - gap - barW - outlinePad
+            local olY = boxY - outlinePad
+            local olW = barW + outlinePad * 2
+            local olH = boxH + outlinePad * 2
+
+            objs.HealthOutline.Position = V2(olX, olY)
+            objs.HealthOutline.Size     = V2(olW, olH)
+            objs.HealthOutline.Visible  = true
+
+            -- Background (dark grey fill inside outline)
+            local bgX = olX + outlinePad
+            local bgY = olY + outlinePad
+            objs.HealthBG.Position = V2(bgX, bgY)
+            objs.HealthBG.Size     = V2(barW, boxH)
+            objs.HealthBG.Visible  = true
+
+            -- Actual health fill (grows from bottom up)
+            local fillH = floor(boxH * healthPct)
+            local fillY = bgY + (boxH - fillH)
+
+            if config.HealthBar.Mode == "Gradient" then
+                objs.HealthBar.Visible = false
+                objs.GUI.HealthGradFrame.Visible = true
+                objs.GUI.HealthGradFrame.Position = UDim2.new(0, bgX, 0, fillY)
+                objs.GUI.HealthGradFrame.Size = UDim2.new(0, barW, 0, fillH)
+                objs.GUI.HealthGrad.Color = ColorSequence.new(config.HealthBar.ColorHigh, config.HealthBar.ColorLow)
+            else
+                objs.GUI.HealthGradFrame.Visible = false
+                objs.HealthBar.Position = V2(bgX, fillY)
+                objs.HealthBar.Size     = V2(barW, fillH)
+                if config.HealthBar.Mode == "Solid" then
+                    objs.HealthBar.Color = config.HealthBar.ColorHigh
+                else
+                    objs.HealthBar.Color = config.HealthBar.ColorLow:Lerp(config.HealthBar.ColorHigh, healthPct)
+                end
+                objs.HealthBar.Visible  = true
+            end
+        else
+            objs.HealthOutline.Visible = false
+            objs.HealthBG.Visible      = false
+            objs.HealthBar.Visible     = false
+            objs.GUI.HealthGradFrame.Visible = false
+        end
+
+        --------------------------------------------------
+        -- Name (centered above box, 2px gap)
+        --------------------------------------------------
+        if config.Name.Enabled then
+            objs.Name.Text  = objs.IsNPC and "NPC" or entity.Name
+            objs.Name.Font  = self.Settings.TextFont
+            objs.Name.Size  = self.Settings.TextSize
+            objs.Name.Color = config.Name.Color
+            objs.Name.Position = V2(boxX + boxW / 2, boxY - objs.Name.TextBounds.Y - 2)
+            objs.Name.Visible  = true
+        else
+            objs.Name.Visible = false
+        end
+
+        --------------------------------------------------
+        -- Bottom elements (weapon → distance), stacked below box with 2px gap each
+        --------------------------------------------------
+        local bottomY = boxY + boxH + 1
+
+        if config.Weapon.Enabled then
+            local tool = character:FindFirstChildOfClass("Tool")
+            if tool then
+                objs.Weapon.Text  = tool.Name
+                objs.Weapon.Font  = self.Settings.TextFont
+                objs.Weapon.Size  = self.Settings.TextSize
+                objs.Weapon.Color = config.Weapon.Color
+                objs.Weapon.Position = V2(boxX + boxW / 2, bottomY)
+                objs.Weapon.Visible = true
+                bottomY = bottomY + objs.Weapon.TextBounds.Y + 1
+            else
+                objs.Weapon.Visible = false
+            end
+        else
+            objs.Weapon.Visible = false
+        end
+
+        if config.Distance.Enabled then
+            objs.Distance.Text  = "[" .. floor(dist + 0.5) .. " studs]"
+            objs.Distance.Font  = self.Settings.TextFont
+            objs.Distance.Size  = self.Settings.TextSize
+            objs.Distance.Color = config.Distance.Color
+            objs.Distance.Position = V2(boxX + boxW / 2, bottomY)
+            objs.Distance.Visible  = true
+        else
+            objs.Distance.Visible = false
+        end
+    end
+end
+
+-- Wire up events
+table.insert(ESP.Connections, Players.PlayerAdded:Connect(function(plr)
+    ESP:Add(plr, false)
+end))
+
+table.insert(ESP.Connections, Players.PlayerRemoving:Connect(function(plr)
+    ESP:Remove(plr)
+end))
+
+for _, plr in pairs(Players:GetPlayers()) do
+    ESP:Add(plr, false)
+end
+
+local enemiesFolder = workspace:FindFirstChild("Spawned") and workspace.Spawned:FindFirstChild("Enemies")
+if enemiesFolder then
+    for _, npc in pairs(enemiesFolder:GetChildren()) do
+        if npc:IsA("Model") then ESP:Add(npc, true) end
+    end
+    table.insert(ESP.Connections, enemiesFolder.ChildAdded:Connect(function(npc)
+        if npc:IsA("Model") then ESP:Add(npc, true) end
+    end))
+    table.insert(ESP.Connections, enemiesFolder.ChildRemoved:Connect(function(npc)
+        ESP:Remove(npc)
+    end))
+end
+
+table.insert(ESP.Connections, RunService.RenderStepped:Connect(function()
+    ESP:Update()
+end))
+
+return ESP
