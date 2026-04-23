@@ -46,7 +46,14 @@ local flags = { -- basically a substitute for ur ui flags (flags["wahdiuawdhwa"]
     ["Boxes"] = true;
     ["Box_Type"] = "Corner";
     ["Box_Color"] = { Color = rgb(255, 255, 255) };
+    ["Box_Fill"] = false;
+    ["Box_Fill_Type"] = "Solid";
+    ["Box_Fill_Color"] = { Color = rgb(255, 255, 255) };
+    ["Box_Fill_Color2"] = { Color = rgb(0, 0, 0) };
+    ["Box_Fill_Transparency"] = 0.5;
+    ["Box_Fill_Gradient_Rotation"] = 90;
     ["Healthbar"] = true; 
+    ["Health_Mode"] = "Two Tone";
     ["Health_High"] = { Color = rgb(0, 255, 0) };
     ["Health_Low"] = { Color = rgb(255, 0, 0) };
     ["Distance"] = true;
@@ -54,7 +61,31 @@ local flags = { -- basically a substitute for ur ui flags (flags["wahdiuawdhwa"]
     ["Skeletons"] = true;
     ["Skeletons_Color"] = { Color = rgb(255, 255, 255) };
     ["Distance_Color"] = { Color = rgb(255, 255, 255) };
-    ["Weapon_Color"] = { Color = rgb(255, 255, 255) }
+    ["Weapon_Color"] = { Color = rgb(255, 255, 255) };
+    
+    ["NPC_Enabled"] = false;
+    ["NPC_Names"] = false; 
+    ["NPC_Name_Type"] = "Both"; 
+    ["NPC_Name_Color"] = { Color = rgb(255, 255, 255) };
+    ["NPC_Boxes"] = true;
+    ["NPC_Box_Type"] = "Corner";
+    ["NPC_Box_Color"] = { Color = rgb(255, 255, 255) };
+    ["NPC_Box_Fill"] = false;
+    ["NPC_Box_Fill_Type"] = "Solid";
+    ["NPC_Box_Fill_Color"] = { Color = rgb(255, 255, 255) };
+    ["NPC_Box_Fill_Color2"] = { Color = rgb(0, 0, 0) };
+    ["NPC_Box_Fill_Transparency"] = 0.5;
+    ["NPC_Box_Fill_Gradient_Rotation"] = 90;
+    ["NPC_Healthbar"] = true; 
+    ["NPC_Health_Mode"] = "Two Tone";
+    ["NPC_Health_High"] = { Color = rgb(0, 255, 0) };
+    ["NPC_Health_Low"] = { Color = rgb(255, 0, 0) };
+    ["NPC_Distance"] = true;
+    ["NPC_Weapon"] = true;
+    ["NPC_Skeletons"] = true;
+    ["NPC_Skeletons_Color"] = { Color = rgb(255, 255, 255) };
+    ["NPC_Distance_Color"] = { Color = rgb(255, 255, 255) };
+    ["NPC_Weapon_Color"] = { Color = rgb(255, 255, 255) }
 }
 
 local fonts = {}; do
@@ -151,9 +182,9 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
             return ins 
         end
 
-        function esp:create_object( player )
-            esp[ player.Name ] = { objects = { }, info = {character = character; humanoid = humanoid}; drawings = { }} 
-            local data = esp[ player.Name ] 
+        function esp:create_object( entity, is_npc )
+            esp[ entity ] = { objects = { }, info = {character = is_npc and entity or nil; humanoid = nil; is_npc = is_npc}; drawings = { }} 
+            local data = esp[ entity ] 
 
             local objects = data.objects; do
                 objects[ "holder" ] = esp:create( "Frame" , {
@@ -177,7 +208,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                     Parent = objects[ "holder" ];
                     TextColor3 = flags["Name_Color"].Color;
                     BorderColor3 = rgb(0, 0, 0);
-                    Text = string.format("%s (@%s)", player.DisplayName, player.Name);
+                    Text = is_npc and "NPC" or string.format("%s (@%s)", entity.DisplayName, entity.Name);
                     Name = "\0";
                     TextStrokeTransparency = 0;
                     AnchorPoint = vec2(0, 1);
@@ -223,6 +254,24 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                     LineJoinMode = Enum.LineJoinMode.Miter
                 });  
                 
+                -- Box Fill
+                objects[ "fill" ] = esp:create( "Frame" , {
+                    Parent = esp.cache;
+                    Name = "\0";
+                    BackgroundTransparency = 0.5;
+                    Position = dim2(0, 1, 0, 1);
+                    BorderColor3 = rgb(0, 0, 0);
+                    Size = dim2(1, -2, 1, -2);
+                    BorderSizePixel = 0;
+                    BackgroundColor3 = rgb(255, 255, 255)
+                });
+                objects[ "fill_gradient" ] = esp:create( "UIGradient" , {
+                    Parent = esp.cache;
+                    Color = ColorSequence.new(rgb(255, 255, 255), rgb(0, 0, 0));
+                    Rotation = 90;
+                });
+                --
+                
                 -- Corner Boxes
                     objects[ "corners" ] = esp:create( "Frame" , {
                         Visible = true;
@@ -241,7 +290,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Name = "line";
                         Position = dim2(0, 0, 0, -2);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0.4, 0, 0, 3);
+                        Size = dim2(0.2, 0, 0, 3);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0)
                     });
@@ -260,7 +309,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Name = "line";
                         Position = dim2(0, 0, 0, 1);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 3, 0.25, 0);
+                        Size = dim2(0, 3, 0.2, 0);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0)
                     });
@@ -280,7 +329,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Name = "line";
                         Position = dim2(1, 0, 0, -2);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0.4, 0, 0, 3);
+                        Size = dim2(0.2, 0, 0, 3);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0)
                     });
@@ -300,7 +349,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Name = "line";
                         Position = dim2(1, 0, 0, 1);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 3, 0.25, 0);
+                        Size = dim2(0, 3, 0.2, 0);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0)
                     });
@@ -320,7 +369,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Name = "line";
                         Position = dim2(0, 0, 1, -2);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0.4, 0, 0, 3);
+                        Size = dim2(0.2, 0, 0, 3);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0)
                     });
@@ -341,7 +390,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Name = "line";
                         Position = dim2(0, 0, 1, -5);
                         AnchorPoint = vec2(0, 1);
-                        Size = dim2(0, 3, 0.25, 0);
+                        Size = dim2(0, 3, 0.2, 0);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0)
                     });
@@ -361,7 +410,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Name = "line";
                         Position = dim2(1, 0, 1, -2);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0.4, 0, 0, 3);
+                        Size = dim2(0.2, 0, 0, 3);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0)
                     });
@@ -382,7 +431,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Name = "line";
                         Position = dim2(1, 0, 1, -5);
                         AnchorPoint = vec2(1, 1);
-                        Size = dim2(0, 3, 0.25, 0);
+                        Size = dim2(0, 3, 0.2, 0);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0)
                     });
@@ -417,6 +466,10 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                         Size = dim2(1, -2, 1, -2);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(255, 255, 255)
+                    });
+                    objects[ "healthbar_gradient" ] = esp:create( "UIGradient" , {
+                        Parent = esp.cache;
+                        Rotation = -90;
                     });
                 -- 
 
@@ -471,19 +524,26 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
             
             do --[[ data functions ]]
                 data.health_changed = function( value )
-                    if not flags[ "Healthbar" ] then 
+                    local prefix = data.info.is_npc and "NPC_" or ""
+                    if not flags[ prefix .. "Healthbar" ] then 
                         return 
                     end
 
-                    local selected_layout = objects[ player.Name ]
                     local humanoid = data.info.humanoid
-                    
                     local multiplier = value / humanoid.MaxHealth
-                    local color = flags[ "Health_Low" ].Color:Lerp( flags["Health_High"].Color, multiplier )
+                    local mode = flags[ prefix .. "Health_Mode" ] or "Two Tone"
                     
                     objects[ "healthbar" ].Size = UDim2.new(1, -2, multiplier, -2)
                     objects[ "healthbar" ].Position = UDim2.new(0, 1, 1 - multiplier, 1)
-                    objects[ "healthbar" ].BackgroundColor3 = color
+
+                    if mode == "Solid" then
+                        objects[ "healthbar" ].BackgroundColor3 = flags[ prefix .. "Health_High" ].Color
+                    elseif mode == "Gradient" then
+                        objects[ "healthbar" ].BackgroundColor3 = rgb(255, 255, 255)
+                    else
+                        local color = flags[ prefix .. "Health_Low" ].Color:Lerp( flags[ prefix .. "Health_High" ].Color, multiplier )
+                        objects[ "healthbar" ].BackgroundColor3 = color
+                    end
                 end
 
                 data.tool_added = function( item )
@@ -543,8 +603,8 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
             end 
         end
 
-        function esp:remove_object(player)
-            local holder = esp[player.Name]
+        function esp:remove_object(entity)
+            local holder = esp[entity]
 
             if not holder then return end 
 
@@ -555,50 +615,46 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
             end
             
             objects[ "holder" ]:Destroy() 
-            esp[player.Name] = nil
+            esp[entity] = nil
         end
         
         function esp.refresh_elements( )
-            for _,v in players:GetPlayers() do 
-                if v == players.LocalPlayer then 
-                    continue
-                end
-                print("1")
-                
-                if not v.Character then 
-                    continue 
-                end 
-                print("2")
+            for entity, path in pairs(esp) do
+                if type(entity) == "string" or type(path) ~= "table" or not path.objects then continue end
 
-                local path = esp[v.Name]
-                local objects = path and path.objects
+                local is_npc = path.info and path.info.is_npc
+                local prefix = is_npc and "NPC_" or ""
                 
-                if not objects then 
-                    continue 
-                end
-                print("3")
-                objects.holder.Parent = flags["Enabled"] and esp.screengui or esp.cache
+                if not is_npc and entity == players.LocalPlayer then continue end
+                
+                if not path.info.character then continue end
 
-                objects[ "name" ].Parent = flags["Names"] and objects["holder"] or esp.cache
-                objects[ "name" ].TextColor3 = flags["Name_Color"].Color
+                local objects = path.objects
                 
-                local name_type = flags["Name_Type"] or "Both"
+                objects.holder.Parent = flags[prefix .. "Enabled"] and esp.screengui or esp.cache
+
+                objects[ "name" ].Parent = flags[prefix .. "Names"] and objects["holder"] or esp.cache
+                objects[ "name" ].TextColor3 = flags[prefix .. "Name_Color"].Color
+                
+                local name_type = flags[prefix .. "Name_Type"] or "Both"
                 local name_text = ""
-                if name_type == "Username" then
-                    name_text = v.Name
+                if is_npc then
+                    name_text = "NPC"
+                elseif name_type == "Username" then
+                    name_text = entity.Name
                 elseif name_type == "Display Name" then
-                    name_text = v.DisplayName
+                    name_text = entity.DisplayName
                 else
-                    name_text = string.format("%s (@%s)", v.DisplayName, v.Name)
+                    name_text = string.format("%s (@%s)", entity.DisplayName, entity.Name)
                 end
                 
                 if objects["name"].Text ~= name_text then
                     objects["name"].Text = name_text
                 end
                 
-                local is_corner = flags[ "Box_Type" ] == "Corner"
+                local is_corner = flags[ prefix .. "Box_Type" ] == "Corner"
 
-                if flags["Boxes"] then 
+                if flags[prefix .. "Boxes"] then 
                     objects[ "corners" ].Parent = (is_corner and objects["holder"]) or esp.cache
                     objects[ "box_handler" ].Parent = (is_corner and esp.cache or objects[ "holder" ])
                     objects[ "box_outline" ].Parent = (is_corner and esp.cache or objects[ "holder" ]) 
@@ -607,43 +663,67 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                     objects[ "box_handler" ].Parent = esp.cache
                     objects[ "box_outline" ].Parent = esp.cache
                 end 
-                print("4")
-                objects[ "box_color" ].Color = flags["Box_Color"].Color 
+                
+                objects[ "box_color" ].Color = flags[prefix .. "Box_Color"].Color 
 
                 for _, corner in objects[ "corners" ]:GetChildren() do
-                    corner.Frame.BackgroundColor3 = flags["Box_Color"].Color
+                    corner.Frame.BackgroundColor3 = flags[prefix .. "Box_Color"].Color
                 end
-                print("5")
+
+                if flags[prefix .. "Box_Fill"] and flags[prefix .. "Boxes"] then
+                    objects["fill"].Parent = objects["holder"]
+                    objects["fill"].BackgroundTransparency = flags[prefix .. "Box_Fill_Transparency"]
+                    
+                    if flags[prefix .. "Box_Fill_Type"] == "Gradient" then
+                        objects["fill"].BackgroundColor3 = rgb(255, 255, 255)
+                        objects["fill_gradient"].Parent = objects["fill"]
+                        objects["fill_gradient"].Color = ColorSequence.new(flags[prefix .. "Box_Fill_Color"].Color, flags[prefix .. "Box_Fill_Color2"].Color)
+                        objects["fill_gradient"].Rotation = flags[prefix .. "Box_Fill_Gradient_Rotation"]
+                    else
+                        objects["fill"].BackgroundColor3 = flags[prefix .. "Box_Fill_Color"].Color
+                        objects["fill_gradient"].Parent = esp.cache
+                    end
+                else
+                    objects["fill"].Parent = esp.cache
+                end
 
                 for _, line in path.drawings do
-                    line.Color = flags["Skeletons_Color"].Color
-                    line.Visible = flags["Skeletons"]
+                    line.Color = flags[prefix .. "Skeletons_Color"].Color
+                    line.Visible = flags[prefix .. "Skeletons"]
                 end
 
-                objects[ "healthbar_holder" ].Parent = flags[ "Healthbar" ] and objects[ "holder" ] or esp.cache
-                if flags["Healthbar"] and path.info and path.info.humanoid then
+                objects[ "healthbar_holder" ].Parent = flags[ prefix .. "Healthbar" ] and objects[ "holder" ] or esp.cache
+                if flags[prefix .. "Healthbar"] and path.info and path.info.humanoid then
                     path.health_changed(path.info.humanoid.Health)
+                    
+                    if flags[ prefix .. "Health_Mode" ] == "Gradient" then
+                        objects[ "healthbar_gradient" ].Parent = objects[ "healthbar" ]
+                        objects[ "healthbar_gradient" ].Color = ColorSequence.new(flags[ prefix .. "Health_High" ].Color, flags[ prefix .. "Health_Low" ].Color)
+                    else
+                        objects[ "healthbar_gradient" ].Parent = esp.cache
+                    end
                 end
-                print("6")
-                objects[ "weapon" ].TextColor3 = flags["Weapon_Color"].Color
-                objects[ "weapon" ].Parent = flags["Weapon"] and v.Character:FindFirstChildOfClass("Tool") and objects[ "holder" ] or esp.cache
+                
+                objects[ "weapon" ].TextColor3 = flags[prefix .. "Weapon_Color"].Color
+                local tool = path.info.character:FindFirstChildOfClass("Tool")
+                objects[ "weapon" ].Parent = flags[prefix .. "Weapon"] and tool and objects[ "holder" ] or esp.cache
 
-                objects[ "distance" ].TextColor3 = flags["Distance_Color"].Color
-                objects[ "distance" ].Parent = flags["Distance"] and objects[ "holder" ] or esp.cache
+                objects[ "distance" ].TextColor3 = flags[prefix .. "Distance_Color"].Color
+                objects[ "distance" ].Parent = flags[prefix .. "Distance"] and objects[ "holder" ] or esp.cache
             end
         end
 
         esp.connection = run.RenderStepped:Connect(function()
-            if not flags["Enabled"] then 
-                return
-            end
+            for entity, data in pairs(esp) do 
+                if type(entity) == "string" or type(data) ~= "table" or not data.objects then continue end
 
-            for _, player in players:GetPlayers() do 
-                local data = esp[player.Name]
+                local is_npc = data.info and data.info.is_npc
+                local prefix = is_npc and "NPC_" or ""
 
-                if not data then 
-                    continue 
-                end 
+                if not flags[prefix .. "Enabled"] then 
+                    data.objects.holder.Visible = false
+                    continue
+                end
 
                 local character = data.info.character
                 local humanoid = data.info.humanoid 
@@ -652,11 +732,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                     continue 
                 end 
 
-                local objects = data and data.objects 
-
-                if not objects then 
-                    continue 
-                end 
+                local objects = data.objects 
 
                 local box_size, box_pos, on_screen, distance = esp:box_solve(humanoid.RootPart)
                 local holder = objects[ "holder" ]
@@ -666,7 +742,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                 end 
 
                 -- Skeletons 
-                local show_skeletons = flags["Skeletons"] and character:FindFirstChild("UpperTorso")
+                local show_skeletons = flags[prefix .. "Skeletons"] and character:FindFirstChild("UpperTorso")
                 
                 for i = 1, #bones do
                     local path = data.drawings[i]
@@ -730,13 +806,17 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
         end)
 
         function esp:unload() 
-            for _, player in players:GetPlayers() do 
-                esp:remove_object(player)
+            for entity, data in pairs(esp) do 
+                if type(entity) ~= "string" and type(data) == "table" and data.objects then
+                    esp:remove_object(entity)
+                end
             end 
 
             esp.connection:Disconnect() 
             esp.player_added:Disconnect() 
             esp.player_removed:Disconnect() 
+            if esp.npc_added then esp.npc_added:Disconnect() end
+            if esp.npc_removed then esp.npc_removed:Disconnect() end 
 
             esp.cache:Destroy() 
             esp.screengui:Destroy()
@@ -760,6 +840,28 @@ end)
 esp.player_removed = players.PlayerRemoving:Connect(function(v)
     esp:remove_object(v)
 end)
+
+-- Load existing NPCs
+local enemies_folder = workspace:FindFirstChild("Spawned") and workspace.Spawned:FindFirstChild("Enemies")
+if enemies_folder then
+    for _, v in enemies_folder:GetChildren() do
+        if v:IsA("Model") then
+            esp:create_object(v, true)
+        end
+    end
+
+    esp.npc_added = enemies_folder.ChildAdded:Connect(function(v)
+        if v:IsA("Model") then
+            esp:create_object(v, true)
+        end
+    end)
+
+    esp.npc_removed = enemies_folder.ChildRemoved:Connect(function(v)
+        if v:IsA("Model") then
+            esp:remove_object(v)
+        end
+    end)
+end
 
 task.wait()
 esp.refresh_elements()
