@@ -22,25 +22,41 @@ local ESP = {
         TextSize = 13,
 
         Enemy = {
-            Box        = { Enabled = false,  Color = Color3.fromRGB(255, 255, 255) },
-            HealthBar  = { Enabled = false,  ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
-            Name       = { Enabled = false,  Color = Color3.fromRGB(255, 255, 255) },
-            Distance   = { Enabled = false,  Color = Color3.fromRGB(200, 200, 200) },
-            Weapon     = { Enabled = false,  Color = Color3.fromRGB(200, 200, 200) },
+            Box        = { Enabled = false, Type = "Regular", Color = Color3.fromRGB(255, 255, 255) },
+            BoxFill    = { Enabled = false, Type = "Solid", Color = Color3.fromRGB(255, 255, 255), Color2 = Color3.fromRGB(0, 0, 0), Rotation = 90, Transparency = 0.5 },
+            HealthBar  = { Enabled = false, Mode = "Two Tone", ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
+            Name       = { Enabled = false, Color = Color3.fromRGB(255, 255, 255) },
+            Distance   = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
             OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(255, 0, 0) }
         },
         Team = {
-            Box        = { Enabled = false, Color = Color3.fromRGB(0, 255, 0) },
-            HealthBar  = { Enabled = false, ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
+            Box        = { Enabled = false, Type = "Regular", Color = Color3.fromRGB(0, 255, 0) },
+            BoxFill    = { Enabled = false, Type = "Solid", Color = Color3.fromRGB(255, 255, 255), Color2 = Color3.fromRGB(0, 0, 0), Rotation = 90, Transparency = 0.5 },
+            HealthBar  = { Enabled = false, Mode = "Two Tone", ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
             Name       = { Enabled = false, Color = Color3.fromRGB(0, 255, 0) },
             Distance   = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
             Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
             OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(0, 255, 0) }
+        },
+        NPC = {
+            Box        = { Enabled = false, Type = "Regular", Color = Color3.fromRGB(255, 150, 0) },
+            BoxFill    = { Enabled = false, Type = "Solid", Color = Color3.fromRGB(255, 255, 255), Color2 = Color3.fromRGB(0, 0, 0), Rotation = 90, Transparency = 0.5 },
+            HealthBar  = { Enabled = false, Mode = "Two Tone", ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
+            Name       = { Enabled = false, Color = Color3.fromRGB(255, 150, 0) },
+            Distance   = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
+            OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(255, 150, 0) }
         }
     },
     Cache = {},
-    Connections = {}
+    Connections = {},
+    ScreenGui = Instance.new("ScreenGui")
 }
+
+local coreGui = game:GetService("CoreGui")
+ESP.ScreenGui.Name = "ESP_Hybrid_Layer"
+ESP.ScreenGui.Parent = coreGui:FindFirstChild("RobloxGui") or coreGui
 
 -- Drawing helper
 local function Draw(class, props)
@@ -50,13 +66,17 @@ local function Draw(class, props)
 end
 
 -- Create cached drawing objects for a player
-function ESP:Add(Player)
-    if Player == LocalPlayer then return end
+function ESP:Add(Entity, isNPC)
+    if Entity == LocalPlayer then return end
 
-    self.Cache[Player] = {
+    local cache = {
+        IsNPC = isNPC,
         -- Box: outline (black border) → inline (colored)
         BoxOutline  = Draw("Square", { Thickness = 3, Filled = false, Color = Color3.new(0, 0, 0), ZIndex = 1 }),
         Box         = Draw("Square", { Thickness = 1, Filled = false, ZIndex = 2 }),
+
+        -- Corner lines (8 lines)
+        Corners = {},
 
         -- Health bar: outline (black border) → background (dark fill) → bar (colored fill)
         HealthOutline = Draw("Square", { Filled = true, Color = Color3.new(0, 0, 0), ZIndex = 1 }),
@@ -69,47 +89,111 @@ function ESP:Add(Player)
         Weapon   = Draw("Text", { Center = true, Outline = true, ZIndex = 4 }),
 
         -- Off-screen arrow
-        Arrow = Draw("Triangle", { Filled = true, ZIndex = 3 })
+        Arrow = Draw("Triangle", { Filled = true, ZIndex = 3 }),
+
+        -- GUI Elements
+        GUI = {}
     }
+
+    for i = 1, 8 do
+        cache.Corners[i] = Draw("Line", { Thickness = 1, ZIndex = 2 })
+        cache.Corners[i .. "_outline"] = Draw("Line", { Thickness = 3, Color = Color3.new(0,0,0), ZIndex = 1 })
+    end
+
+    local fillFrame = Instance.new("Frame")
+    fillFrame.BorderSizePixel = 0
+    fillFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    fillFrame.Visible = false
+    fillFrame.Parent = self.ScreenGui
+    cache.GUI.Fill = fillFrame
+
+    local fillGrad = Instance.new("UIGradient")
+    fillGrad.Parent = fillFrame
+    cache.GUI.FillGrad = fillGrad
+
+    local healthGradFrame = Instance.new("Frame")
+    healthGradFrame.BorderSizePixel = 0
+    healthGradFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    healthGradFrame.Visible = false
+    healthGradFrame.Parent = self.ScreenGui
+    cache.GUI.HealthGradFrame = healthGradFrame
+
+    local healthGrad = Instance.new("UIGradient")
+    healthGrad.Rotation = -90
+    healthGrad.Parent = healthGradFrame
+    cache.GUI.HealthGrad = healthGrad
+
+    self.Cache[Entity] = cache
 end
 
 -- Clean up drawings
-function ESP:Remove(Player)
-    local cache = self.Cache[Player]
+function ESP:Remove(Entity)
+    local cache = self.Cache[Entity]
     if not cache then return end
-    for _, obj in pairs(cache) do obj:Remove() end
-    self.Cache[Player] = nil
+    for k, obj in pairs(cache) do 
+        if type(obj) == "table" and k == "Corners" then
+            for _, line in pairs(obj) do line:Remove() end
+        elseif type(obj) == "table" and k == "GUI" then
+            for _, gui in pairs(obj) do gui:Destroy() end
+        elseif type(obj) ~= "boolean" then 
+            obj:Remove() 
+        end
+    end
+    self.Cache[Entity] = nil
 end
 
 -- Hot-reload safe teardown
 function ESP:Unload()
     for _, c in pairs(self.Connections) do c:Disconnect() end
-    for plr in pairs(self.Cache) do self:Remove(plr) end
+    for entity in pairs(self.Cache) do self:Remove(entity) end
+    if self.ScreenGui then self.ScreenGui:Destroy() end
 end
 
 -- Hide all drawings for a player
 local function HideAll(objs)
-    for _, obj in pairs(objs) do obj.Visible = false end
+    for k, obj in pairs(objs) do 
+        if type(obj) == "table" and k == "Corners" then
+            for _, line in pairs(obj) do line.Visible = false end
+        elseif type(obj) == "table" and k == "GUI" then
+            for _, gui in pairs(obj) do 
+                if gui:IsA("Frame") then gui.Visible = false end
+            end
+        elseif type(obj) ~= "boolean" then
+            obj.Visible = false 
+        end
+    end
 end
 
 -- Main render loop
 function ESP:Update()
     Camera = workspace.CurrentCamera -- refresh in case of respawn
 
-    for player, objs in pairs(self.Cache) do
-        local character = player.Character
+    for entity, objs in pairs(self.Cache) do
+        local character
+        if objs.IsNPC then
+            character = entity
+        else
+            character = entity.Character
+        end
         local humanoid  = character and character:FindFirstChild("Humanoid")
         local hrp       = character and character:FindFirstChild("HumanoidRootPart")
         local head      = character and character:FindFirstChild("Head")
 
-        -- Determine team flag
-        local isTeammate = player.Team ~= nil and player.Team == LocalPlayer.Team
-        local config = isTeammate and self.Settings.Team or self.Settings.Enemy
+        local config
+        if objs.IsNPC then
+            config = self.Settings.NPC
+        else
+            local isTeammate = entity.Team ~= nil and entity.Team == LocalPlayer.Team
+            config = isTeammate and self.Settings.Team or self.Settings.Enemy
+            if self.Settings.TeamCheck and isTeammate then 
+                -- handled via validity checks
+            end
+        end
 
         -- Validity checks
         local alive = humanoid and humanoid.Health > 0
         local pass  = self.Settings.Enabled and character and alive and hrp and head
-        if pass and self.Settings.TeamCheck and isTeammate then pass = false end
+        if not objs.IsNPC and self.Settings.TeamCheck and entity.Team == LocalPlayer.Team then pass = false end
 
         local dist = 0
         if pass then
@@ -186,20 +270,73 @@ function ESP:Update()
         local healthPct = clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
 
         --------------------------------------------------
-        -- Box (outline + inline, 1px each)
+        -- Box (outline + inline, 1px each) + Corners + Fill
         --------------------------------------------------
         if config.Box.Enabled then
-            objs.Box.Position  = boxPos
-            objs.Box.Size      = boxSize
-            objs.Box.Color     = config.Box.Color
-            objs.Box.Visible   = true
+            if config.Box.Type == "Corner" then
+                objs.Box.Visible = false
+                objs.BoxOutline.Visible = false
+                local cornerLen = floor(boxW * 0.2)
+                local cornerH = floor(boxH * 0.2)
+                
+                local c = objs.Corners
+                for i=1,8 do c[i].Visible = true; c[i.."_outline"].Visible = true end
+                
+                -- Top Left
+                c[1].From = V2(boxX, boxY); c[1].To = V2(boxX + cornerLen, boxY)
+                c[2].From = V2(boxX, boxY); c[2].To = V2(boxX, boxY + cornerH)
+                
+                -- Top Right
+                c[3].From = V2(boxX + boxW, boxY); c[3].To = V2(boxX + boxW - cornerLen, boxY)
+                c[4].From = V2(boxX + boxW, boxY); c[4].To = V2(boxX + boxW, boxY + cornerH)
+                
+                -- Bottom Left
+                c[5].From = V2(boxX, boxY + boxH); c[5].To = V2(boxX + cornerLen, boxY + boxH)
+                c[6].From = V2(boxX, boxY + boxH); c[6].To = V2(boxX, boxY + boxH - cornerH)
+                
+                -- Bottom Right
+                c[7].From = V2(boxX + boxW, boxY + boxH); c[7].To = V2(boxX + boxW - cornerLen, boxY + boxH)
+                c[8].From = V2(boxX + boxW, boxY + boxH); c[8].To = V2(boxX + boxW, boxY + boxH - cornerH)
 
-            objs.BoxOutline.Position = boxPos
-            objs.BoxOutline.Size     = boxSize
-            objs.BoxOutline.Visible  = true
+                for i=1,8 do
+                    c[i].Color = config.Box.Color
+                    c[i.."_outline"].From = c[i].From
+                    c[i.."_outline"].To = c[i].To
+                end
+            else
+                for i=1,8 do objs.Corners[i].Visible = false; objs.Corners[i.."_outline"].Visible = false end
+                objs.Box.Position  = boxPos
+                objs.Box.Size      = boxSize
+                objs.Box.Color     = config.Box.Color
+                objs.Box.Visible   = true
+
+                objs.BoxOutline.Position = boxPos
+                objs.BoxOutline.Size     = boxSize
+                objs.BoxOutline.Visible  = true
+            end
         else
             objs.Box.Visible = false
             objs.BoxOutline.Visible = false
+            for i=1,8 do objs.Corners[i].Visible = false; objs.Corners[i.."_outline"].Visible = false end
+        end
+
+        if config.BoxFill.Enabled and config.Box.Enabled then
+            objs.GUI.Fill.Visible = true
+            objs.GUI.Fill.Position = UDim2.new(0, boxX, 0, boxY)
+            objs.GUI.Fill.Size = UDim2.new(0, boxW, 0, boxH)
+            objs.GUI.Fill.BackgroundTransparency = config.BoxFill.Transparency
+            
+            if config.BoxFill.Type == "Gradient" then
+                objs.GUI.Fill.BackgroundColor3 = Color3.new(1, 1, 1)
+                objs.GUI.FillGrad.Enabled = true
+                objs.GUI.FillGrad.Color = ColorSequence.new(config.BoxFill.Color, config.BoxFill.Color2)
+                objs.GUI.FillGrad.Rotation = config.BoxFill.Rotation
+            else
+                objs.GUI.Fill.BackgroundColor3 = config.BoxFill.Color
+                objs.GUI.FillGrad.Enabled = false
+            end
+        else
+            objs.GUI.Fill.Visible = false
         end
 
         --------------------------------------------------
@@ -232,23 +369,36 @@ function ESP:Update()
             -- Actual health fill (grows from bottom up)
             local fillH = floor(boxH * healthPct)
             local fillY = bgY + (boxH - fillH)
-            local hCol  = config.HealthBar.ColorLow:Lerp(config.HealthBar.ColorHigh, healthPct)
 
-            objs.HealthBar.Position = V2(bgX, fillY)
-            objs.HealthBar.Size     = V2(barW, fillH)
-            objs.HealthBar.Color    = hCol
-            objs.HealthBar.Visible  = true
+            if config.HealthBar.Mode == "Gradient" then
+                objs.HealthBar.Visible = false
+                objs.GUI.HealthGradFrame.Visible = true
+                objs.GUI.HealthGradFrame.Position = UDim2.new(0, bgX, 0, fillY)
+                objs.GUI.HealthGradFrame.Size = UDim2.new(0, barW, 0, fillH)
+                objs.GUI.HealthGrad.Color = ColorSequence.new(config.HealthBar.ColorHigh, config.HealthBar.ColorLow)
+            else
+                objs.GUI.HealthGradFrame.Visible = false
+                objs.HealthBar.Position = V2(bgX, fillY)
+                objs.HealthBar.Size     = V2(barW, fillH)
+                if config.HealthBar.Mode == "Solid" then
+                    objs.HealthBar.Color = config.HealthBar.ColorHigh
+                else
+                    objs.HealthBar.Color = config.HealthBar.ColorLow:Lerp(config.HealthBar.ColorHigh, healthPct)
+                end
+                objs.HealthBar.Visible  = true
+            end
         else
             objs.HealthOutline.Visible = false
             objs.HealthBG.Visible      = false
             objs.HealthBar.Visible     = false
+            objs.GUI.HealthGradFrame.Visible = false
         end
 
         --------------------------------------------------
         -- Name (centered above box, 2px gap)
         --------------------------------------------------
         if config.Name.Enabled then
-            objs.Name.Text  = player.Name
+            objs.Name.Text  = objs.IsNPC and "NPC" or entity.Name
             objs.Name.Font  = self.Settings.TextFont
             objs.Name.Size  = self.Settings.TextSize
             objs.Name.Color = config.Name.Color
@@ -295,7 +445,7 @@ end
 
 -- Wire up events
 table.insert(ESP.Connections, Players.PlayerAdded:Connect(function(plr)
-    ESP:Add(plr)
+    ESP:Add(plr, false)
 end))
 
 table.insert(ESP.Connections, Players.PlayerRemoving:Connect(function(plr)
@@ -303,7 +453,20 @@ table.insert(ESP.Connections, Players.PlayerRemoving:Connect(function(plr)
 end))
 
 for _, plr in pairs(Players:GetPlayers()) do
-    ESP:Add(plr)
+    ESP:Add(plr, false)
+end
+
+local enemiesFolder = workspace:FindFirstChild("Spawned") and workspace.Spawned:FindFirstChild("Enemies")
+if enemiesFolder then
+    for _, npc in pairs(enemiesFolder:GetChildren()) do
+        if npc:IsA("Model") then ESP:Add(npc, true) end
+    end
+    table.insert(ESP.Connections, enemiesFolder.ChildAdded:Connect(function(npc)
+        if npc:IsA("Model") then ESP:Add(npc, true) end
+    end))
+    table.insert(ESP.Connections, enemiesFolder.ChildRemoved:Connect(function(npc)
+        ESP:Remove(npc)
+    end))
 end
 
 table.insert(ESP.Connections, RunService.RenderStepped:Connect(function()
