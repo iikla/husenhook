@@ -2138,7 +2138,8 @@
                     Position = dim2(0, 0, 0, 0); 
                     BorderColor3 = rgb(0, 0, 0);
                     Visible = false;
-                    Size = dim2(0, 140, 0, 180);
+                    Size = dim2(0, 140, 0, 0);
+                    AutomaticSize = Enum.AutomaticSize.XY;
                     BorderSizePixel = 0;
                     BackgroundColor3 = themes.preset[tostring(self.count)]
                 }); library:apply_theme(settings_frame, tostring(self.count), "BackgroundColor3")
@@ -2151,27 +2152,39 @@
                     BackgroundColor3 = themes.preset[tostring(self.count)]
                 }); library:apply_theme(a, tostring(self.count), "BackgroundColor3")
                 
+                library:create("UIPadding", {
+                    Parent = a;
+                    PaddingTop = dim(0, 1);
+                    PaddingBottom = dim(0, 1);
+                    PaddingLeft = dim(0, 1);
+                    PaddingRight = dim(0, 1);
+                })
+
                 local e = library:create("Frame", {
                     Parent = a;
-                    Position = dim2(0, 1, 0, 1);
                     BorderColor3 = rgb(0, 0, 0);
-                    Size = dim2(1, -2, 1, -2);
+                    Size = dim2(1, 0, 1, 0);
                     BorderSizePixel = 0;
                     BackgroundColor3 = rgb(0, 0, 0);
                     BackgroundTransparency = 0.6;
                     ZIndex = -1
                 }); 
 
-                local elements_container = library:create("ScrollingFrame", {
+                library:create("UIPadding", {
                     Parent = e;
-                    Position = dim2(0, 4, 0, 5);
+                    PaddingTop = dim(0, 5);
+                    PaddingBottom = dim(0, 5);
+                    PaddingLeft = dim(0, 4);
+                    PaddingRight = dim(0, 4);
+                })
+
+                local elements_container = library:create("Frame", {
+                    Parent = e;
                     BorderColor3 = rgb(0, 0, 0);
-                    Size = dim2(1, -8, 1, -10);
+                    Size = dim2(1, 0, 0, 0);
+                    AutomaticSize = Enum.AutomaticSize.Y;
                     BackgroundTransparency = 1;
                     BorderSizePixel = 0;
-                    ScrollBarThickness = 2;
-                    CanvasSize = dim2(0, 0, 0, 0);
-                    AutomaticCanvasSize = Enum.AutomaticSize.Y;
                 }); cfg.elements = elements_container
 
                 library:create("UIListLayout", {
@@ -2183,7 +2196,7 @@
                 local UIPadding = library:create("UIPadding", {
                     Parent = elements_container,
                     Name = "",
-                    PaddingBottom = dim(0, 7)
+                    PaddingBottom = dim(0, 2)
                 })
 
                 function cfg.set_visible(bool) 
