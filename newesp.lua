@@ -17,7 +17,6 @@ local ESP = {
     Settings = {
         Enabled = false,
         MaxDistance = 1500,
-        TeamCheck = true,
         TextFont = 2,
         TextSize = 13,
 
