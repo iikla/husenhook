@@ -111,10 +111,9 @@ end
 local function RenderESP(objs, character, name, config, maxDist)
     local humanoid  = character:FindFirstChild("Humanoid")
     local hrp       = character:FindFirstChild("HumanoidRootPart")
-    local head      = character:FindFirstChild("Head")
 
     local alive = humanoid and humanoid.Health > 0
-    local pass = character and alive and hrp and head
+    local pass = character and alive and hrp
 
     local dist = 0
     if pass then
@@ -320,31 +319,41 @@ end
 
 local function CheckNPC(inst)
     if inst:IsA("Model") and inst ~= LocalPlayer.Character and not Players:GetPlayerFromCharacter(inst) then
-        if inst:FindFirstChild("Humanoid") and inst:FindFirstChild("HumanoidRootPart") then
-            ESP:AddNPC(inst)
+        local p = inst.Parent
+        if p and (p.Name == "Enemies" or p.Name == "Wildlife") and p.Parent and p.Parent.Name == "Spawned" then
+            if inst:FindFirstChild("Humanoid") and inst:FindFirstChild("HumanoidRootPart") then
+                ESP:AddNPC(inst)
+            end
         end
     end
 end
 
-for _, desc in pairs(workspace:GetDescendants()) do
-    CheckNPC(desc)
-end
-
-table.insert(ESP.Connections, workspace.DescendantAdded:Connect(function(desc)
-    task.defer(function()
-        if desc:IsA("Model") then
+task.spawn(function()
+    local Spawned = workspace:WaitForChild("Spawned", 10)
+    if Spawned then
+        for _, desc in pairs(Spawned:GetDescendants()) do
             CheckNPC(desc)
-        elseif desc:IsA("Humanoid") and desc.Parent and desc.Parent:IsA("Model") then
-            CheckNPC(desc.Parent)
         end
-    end)
-end))
+        
+        table.insert(ESP.Connections, Spawned.DescendantAdded:Connect(function(desc)
+            task.defer(function()
+                if desc:IsA("Model") then
+                    CheckNPC(desc)
+                elseif desc:IsA("Humanoid") and desc.Parent and desc.Parent:IsA("Model") then
+                    CheckNPC(desc.Parent)
+                elseif desc.Name == "HumanoidRootPart" and desc.Parent and desc.Parent:IsA("Model") then
+                    CheckNPC(desc.Parent)
+                end
+            end)
+        end))
 
-table.insert(ESP.Connections, workspace.DescendantRemoving:Connect(function(desc)
-    if desc:IsA("Model") and ESP.NPCCache[desc] then
-        ESP:RemoveNPC(desc)
+        table.insert(ESP.Connections, Spawned.DescendantRemoving:Connect(function(desc)
+            if desc:IsA("Model") and ESP.NPCCache[desc] then
+                ESP:RemoveNPC(desc)
+            end
+        end))
     end
-end))
+end)
 
 table.insert(ESP.Connections, RunService.RenderStepped:Connect(function()
     ESP:Update()
