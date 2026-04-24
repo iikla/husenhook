@@ -108,6 +108,41 @@ local function HideAll(objs)
     for _, obj in pairs(objs) do obj.Visible = false end
 end
 
+local function GetModelAABB(model)
+    local minX, minY, minZ = math.huge, math.huge, math.huge
+    local maxX, maxY, maxZ = -math.huge, -math.huge, -math.huge
+    local found = false
+
+    for _, part in ipairs(model:GetDescendants()) do
+        if part:IsA("BasePart") and part.Transparency < 1 and part.Name ~= "HumanoidRootPart" then
+            found = true
+            local sizeX, sizeY, sizeZ = part.Size.X, part.Size.Y, part.Size.Z
+            local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = part.CFrame:GetComponents()
+
+            local wiseX = 0.5 * (math.abs(r00) * sizeX + math.abs(r01) * sizeY + math.abs(r02) * sizeZ)
+            local wiseY = 0.5 * (math.abs(r10) * sizeX + math.abs(r11) * sizeY + math.abs(r12) * sizeZ)
+            local wiseZ = 0.5 * (math.abs(r20) * sizeX + math.abs(r21) * sizeY + math.abs(r22) * sizeZ)
+
+            minX = math.min(minX, x - wiseX)
+            minY = math.min(minY, y - wiseY)
+            minZ = math.min(minZ, z - wiseZ)
+
+            maxX = math.max(maxX, x + wiseX)
+            maxY = math.max(maxY, y + wiseY)
+            maxZ = math.max(maxZ, z + wiseZ)
+        end
+    end
+    
+    if not found then
+        local cframe, size = model:GetBoundingBox()
+        return cframe.Position, size
+    end
+
+    local center = Vector3.new((minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2)
+    local size = Vector3.new(maxX - minX, maxY - minY, maxZ - minZ)
+    return center, size
+end
+
 local function RenderESP(objs, character, name, config, maxDist)
     local humanoid  = character:FindFirstChild("Humanoid")
     local hrp       = character:FindFirstChild("HumanoidRootPart")
@@ -168,15 +203,13 @@ local function RenderESP(objs, character, name, config, maxDist)
 
     objs.Arrow.Visible = false
 
-    local cframe, size = character:GetBoundingBox()
-    local rootPos = Camera:WorldToViewportPoint(cframe.Position)
+    local center, size = GetModelAABB(character)
+    local rootPos = Camera:WorldToViewportPoint(center)
     local scale = 1 / (rootPos.Z * math.tan(rad(Camera.FieldOfView * 0.5)) * 2) * 1000
     
     local camRight = Camera.CFrame.RightVector
-    local look = cframe.LookVector
-    local right = cframe.RightVector
+    local widthProj = math.abs(camRight.X) * size.X + math.abs(camRight.Z) * size.Z
     
-    local widthProj = math.abs(camRight:Dot(right)) * size.X + math.abs(camRight:Dot(look)) * size.Z
     local boxW = floor(math.max(widthProj, 1) * scale)
     local boxH = floor(size.Y * scale)
     
