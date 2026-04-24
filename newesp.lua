@@ -168,14 +168,22 @@ local function RenderESP(objs, character, name, config, maxDist)
 
     objs.Arrow.Visible = false
 
-    local rootPos = Camera:WorldToViewportPoint(hrp.Position)
+    local cframe, size = character:GetBoundingBox()
+    local rootPos = Camera:WorldToViewportPoint(cframe.Position)
     local scale = 1 / (rootPos.Z * math.tan(rad(Camera.FieldOfView * 0.5)) * 2) * 1000
-    local boxW = floor(4.5 * scale)
-    local boxH = floor(6 * scale)
+    
+    local camRight = Camera.CFrame.RightVector
+    local look = cframe.LookVector
+    local right = cframe.RightVector
+    
+    local widthProj = math.abs(camRight:Dot(right)) * size.X + math.abs(camRight:Dot(look)) * size.Z
+    local boxW = floor(math.max(widthProj, 1) * scale)
+    local boxH = floor(size.Y * scale)
+    
     local scrX = floor(rootPos.X)
     local scrY = floor(rootPos.Y)
     local boxX = floor(scrX - boxW * 0.5)
-    local boxY = floor((scrY - boxH * 0.5) + (0.5 * scale))
+    local boxY = floor(scrY - boxH * 0.5)
 
     local boxPos  = V2(boxX, boxY)
     local boxSize = V2(boxW, boxH)
