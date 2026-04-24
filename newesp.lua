@@ -177,8 +177,12 @@ local function RenderESP(objs, character, name, config, maxDist)
     local right = cframe.RightVector
     
     local widthProj = math.abs(camRight:Dot(right)) * size.X + math.abs(camRight:Dot(look)) * size.Z
-    local boxW = floor(math.max(widthProj, 1) * scale)
-    local boxH = floor(size.Y * scale)
+    
+    widthProj = math.clamp(widthProj, 1, 12)
+    local heightProj = math.clamp(size.Y, 1, 12)
+    
+    local boxW = floor(widthProj * scale)
+    local boxH = floor(heightProj * scale)
     
     local scrX = floor(rootPos.X)
     local scrY = floor(rootPos.Y)
