@@ -301,7 +301,7 @@ function ESP:Update()
             continue
         end
 
-        RenderESP(objs, model, model.Name, self.Settings.NPC, self.Settings.NPC.MaxDistance)
+        RenderESP(objs, model, "NPC", self.Settings.NPC, self.Settings.NPC.MaxDistance)
     end
 end
 
