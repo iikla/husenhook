@@ -883,20 +883,7 @@
             return setmetatable(cfg, library)
         end 
 
-        local watermark = library:watermark({name = "priv9 - 100 fps - 100 ping"})
-        local fps = 0
-        local watermark_delay = tick() 
-
-        run.RenderStepped:Connect(function()
-            fps += 1
-
-            if tick() - watermark_delay > 1 then 
-                watermark_delay = tick()
-                local ping = math.floor(stats.PerformanceStats.Ping:GetValue()) .. "ms"                
-                watermark.update_text(string.format("priv9 - fps: %s - ping: %s", fps, ping))
-                fps = 0
-            end
-        end)
+        
         
         --[[
         	local pingTimeSec = game.Players.LocalPlayer:GetNetworkPing()
