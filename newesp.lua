@@ -126,7 +126,7 @@ local function RenderESP(objs, character, name, config, maxDist)
 
     if not pass then
         HideAll(objs)
-        if config.OOF.Enabled and alive and hrp then
+        if config.OOF and config.OOF.Enabled and alive and hrp then
             local _, vis = Camera:WorldToViewportPoint(hrp.Position)
             if not vis then
                 local proj = Camera.CFrame:PointToObjectSpace(hrp.Position)
@@ -150,7 +150,7 @@ local function RenderESP(objs, character, name, config, maxDist)
 
     if not onScreen then
         HideAll(objs)
-        if config.OOF.Enabled then
+        if config.OOF and config.OOF.Enabled then
             local proj = Camera.CFrame:PointToObjectSpace(hrp.Position)
             local ang  = atan2(proj.Z, proj.X)
             local dir  = V2(cos(ang), sin(ang))
@@ -244,7 +244,7 @@ local function RenderESP(objs, character, name, config, maxDist)
 
     local bottomY = boxY + boxH + 1
 
-    if config.Weapon.Enabled then
+    if config.Weapon and config.Weapon.Enabled then
         local tool = character:FindFirstChildOfClass("Tool")
         if tool then
             objs.Weapon.Text  = tool.Name
@@ -301,7 +301,8 @@ function ESP:Update()
             continue
         end
 
-        RenderESP(objs, model, "NPC", self.Settings.NPC, self.Settings.NPC.MaxDistance)
+        local npcName = model:GetAttribute("Gender") ~= nil and "NPC" or "Bear"
+        RenderESP(objs, model, npcName, self.Settings.NPC, self.Settings.NPC.MaxDistance)
     end
 end
 
