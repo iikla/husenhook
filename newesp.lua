@@ -44,8 +44,7 @@ local ESP = {
             HealthBar  = { Enabled = false, ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
             Name       = { Enabled = false, Color = Color3.fromRGB(255, 255, 255) },
             Distance   = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
-            Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
-            OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(255, 0, 0) }
+            Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) }
         }
     },
     Cache = {},
