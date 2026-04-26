@@ -2691,7 +2691,7 @@
                     BorderColor3 = rgb(0, 0, 0),
                     BorderSizePixel = 0,
                     BackgroundColor3 = themes.preset.outline
-                }) library:apply_theme(left_outline, "outline", "BackgroundColor3")
+                })
 
                 local left_inline = library:create("Frame", {
                     Parent = left_outline,
@@ -2717,11 +2717,11 @@
                     BackgroundTransparency = 1,
                     Size = dim2(1, 0, 1, 0),
                     ScrollBarThickness = 2,
-                    ScrollBarImageColor3 = themes.preset.accent or rgb(255, 255, 255),
+                    ScrollBarImageColor3 = themes.preset["1"] or rgb(255, 255, 255),
                     CanvasSize = dim2(0, 0, 0, 0),
                     AutomaticCanvasSize = Enum.AutomaticSize.Y,
                     BorderSizePixel = 0,
-                }) library:apply_theme(scrolling_frame, "accent", "ScrollBarImageColor3")
+                }) library:apply_theme(scrolling_frame, "1", "ScrollBarImageColor3")
 
                 library:create("UIListLayout", {
                     Parent = scrolling_frame,
@@ -2745,7 +2745,7 @@
                     BorderColor3 = rgb(0, 0, 0),
                     BorderSizePixel = 0,
                     BackgroundColor3 = themes.preset.outline
-                }) library:apply_theme(right_outline, "outline", "BackgroundColor3")
+                })
 
                 local right_inline = library:create("Frame", {
                     Parent = right_outline,
@@ -2813,7 +2813,7 @@
                     BorderColor3 = rgb(0, 0, 0),
                     BorderSizePixel = 0,
                     BackgroundColor3 = themes.preset.outline
-                }) library:apply_theme(whitelist_btn_outline, "outline", "BackgroundColor3")
+                })
 
                 local whitelist_btn_inline = library:create("Frame", {
                     Parent = whitelist_btn_outline,
@@ -2830,8 +2830,8 @@
                     Size = dim2(1, -2, 1, -2),
                     BorderColor3 = rgb(0, 0, 0),
                     BorderSizePixel = 0,
-                    BackgroundColor3 = themes.preset.accent
-                }) library:apply_theme(whitelist_btn_accent, "accent", "BackgroundColor3")
+                    BackgroundColor3 = themes.preset["1"]
+                }) library:apply_theme(whitelist_btn_accent, "1", "BackgroundColor3")
 
                 local whitelist_btn_text = library:create("TextLabel", {
                     Parent = whitelist_btn_accent,
@@ -2856,7 +2856,8 @@
                     
                     for pl, btn in pairs(player_buttons) do
                         if pl == player then
-                            btn.TextColor3 = themes.preset.accent or rgb(255, 255, 255)
+                            btn.TextColor3 = themes.preset["1"] or rgb(255, 255, 255)
+                            library:apply_theme(btn, "1", "TextColor3")
                         else
                             btn.TextColor3 = rgb(170, 170, 170)
                         end
