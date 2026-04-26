@@ -17,7 +17,7 @@ local ESP = {
     Settings = {
         Enabled = false,
         MaxDistance = 1500,
-        TeamCheck = true,
+        UseWhitelist = false,
         TextFont = 2,
         TextSize = 13,
 
@@ -29,14 +29,6 @@ local ESP = {
             Weapon     = { Enabled = false,  Color = Color3.fromRGB(200, 200, 200) },
             OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(255, 0, 0) }
         },
-        Team = {
-            Box        = { Enabled = false, Color = Color3.fromRGB(0, 255, 0) },
-            HealthBar  = { Enabled = false, ColorLow = Color3.fromRGB(255, 0, 0), ColorHigh = Color3.fromRGB(0, 255, 0) },
-            Name       = { Enabled = false, Color = Color3.fromRGB(0, 255, 0) },
-            Distance   = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
-            Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) },
-            OOF        = { Enabled = false, Radius = 300, Size = 15, Color = Color3.fromRGB(0, 255, 0) }
-        },
         NPC = {
             Enabled = false,
             MaxDistance = 1500,
@@ -47,6 +39,7 @@ local ESP = {
             Weapon     = { Enabled = false, Color = Color3.fromRGB(200, 200, 200) }
         }
     },
+    Whitelist = {},
     Cache = {},
     NPCCache = {},
     Connections = {}
@@ -288,15 +281,14 @@ function ESP:Update()
 
     for player, objs in pairs(self.Cache) do
         local character = player.Character
-        local isTeammate = player.Team ~= nil and player.Team == LocalPlayer.Team
-        local config = isTeammate and self.Settings.Team or self.Settings.Enemy
+        local isWhitelisted = table.find(self.Whitelist, player.Name) ~= nil or table.find(self.Whitelist, player.UserId) ~= nil
         
-        if not self.Settings.Enabled or (self.Settings.TeamCheck and isTeammate) or not character then
+        if not self.Settings.Enabled or (self.Settings.UseWhitelist and isWhitelisted) or not character then
             HideAll(objs)
             continue
         end
 
-        RenderESP(objs, character, player.Name, config, self.Settings.MaxDistance)
+        RenderESP(objs, character, player.Name, self.Settings.Enemy, self.Settings.MaxDistance)
     end
 
     for model, objs in pairs(self.NPCCache) do
