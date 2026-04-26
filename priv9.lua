@@ -1291,7 +1291,7 @@
     
                     min = options.min or options.minimum or 0,
                     max = options.max or options.maximum or 100,
-                    intervals = options.interval or options.decimal or 1,
+                    increment = options.increment or options.interval or options.decimal or 1,
                     default = options.default or 10,
                     value = options.default or 10, 
 
@@ -1363,10 +1363,20 @@
                             return 
                         end 
 
-                        cfg.value = clamp(library:round(valuee, cfg.intervals), cfg.min, cfg.max)
+                        cfg.value = clamp(library:round(valuee, cfg.increment), cfg.min, cfg.max)
 
                         accent.Size = dim2((cfg.value - cfg.min) / (cfg.max - cfg.min), 0, 1, 0)
-                        eeeee.Text = cfg.name ..  "<font color='#AAAAAA'>" .. ' - ' .. tostring(cfg.value) .. cfg.suffix .. "</font>"
+                        
+                        -- Judge decimals based off of increment
+                        local decimals = 0
+                        local incStr = tostring(cfg.increment)
+                        if incStr:find("%.") then
+                            decimals = #incStr - incStr:find("%.")
+                        end
+                        local formatString = "%." .. decimals .. "f"
+                        local formattedValue = string.format(formatString, cfg.value)
+                        
+                        eeeee.Text = cfg.name ..  "<font color='#AAAAAA'>" .. ' - ' .. formattedValue .. cfg.suffix .. "</font>"
                         
                         flags[cfg.flag] = cfg.value
 
@@ -2655,6 +2665,277 @@
                 
                 return setmetatable(cfg, library)
             end 
+
+            function library:playerlist(options)
+                local cfg = {
+                    callback = options.callback or function() end,
+                }
+                local selected_player_name = nil
+                local player_buttons = {}
+
+                -- Main Holder
+                local holder = library:create("Frame", {
+                    Parent = self.holder,
+                    BackgroundTransparency = 1,
+                    Size = dim2(1, 0, 1, 0),
+                    Name = "\0",
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = rgb(255, 255, 255)
+                })
+
+                -- Left side (Player List)
+                local left_outline = library:create("Frame", {
+                    Parent = holder,
+                    Position = dim2(0, 0, 0, 0),
+                    Size = dim2(0.5, -3, 1, 0),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = themes.preset.outline
+                }) library:apply_theme(left_outline, "outline", "BackgroundColor3")
+
+                local left_inline = library:create("Frame", {
+                    Parent = left_outline,
+                    Position = dim2(0, 1, 0, 1),
+                    Size = dim2(1, -2, 1, -2),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = themes.preset.inline
+                }) library:apply_theme(left_inline, "inline", "BackgroundColor3")
+
+                local left_bg = library:create("Frame", {
+                    Parent = left_inline,
+                    Position = dim2(0, 1, 0, 1),
+                    Size = dim2(1, -2, 1, -2),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = rgb(25, 25, 25)
+                })
+
+                local scrolling_frame = library:create("ScrollingFrame", {
+                    Parent = left_bg,
+                    Active = true,
+                    BackgroundTransparency = 1,
+                    Size = dim2(1, 0, 1, 0),
+                    ScrollBarThickness = 2,
+                    ScrollBarImageColor3 = themes.preset.accent or rgb(255, 255, 255),
+                    CanvasSize = dim2(0, 0, 0, 0),
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                    BorderSizePixel = 0,
+                }) library:apply_theme(scrolling_frame, "accent", "ScrollBarImageColor3")
+
+                library:create("UIListLayout", {
+                    Parent = scrolling_frame,
+                    SortOrder = Enum.SortOrder.LayoutOrder,
+                    Padding = dim(0, 2)
+                })
+                
+                library:create("UIPadding", {
+                    Parent = scrolling_frame,
+                    PaddingTop = dim(0, 4),
+                    PaddingBottom = dim(0, 4),
+                    PaddingLeft = dim(0, 4),
+                    PaddingRight = dim(0, 4),
+                })
+
+                -- Right side (Player Details)
+                local right_outline = library:create("Frame", {
+                    Parent = holder,
+                    Position = dim2(0.5, 3, 0, 0),
+                    Size = dim2(0.5, -3, 1, 0),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = themes.preset.outline
+                }) library:apply_theme(right_outline, "outline", "BackgroundColor3")
+
+                local right_inline = library:create("Frame", {
+                    Parent = right_outline,
+                    Position = dim2(0, 1, 0, 1),
+                    Size = dim2(1, -2, 1, -2),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = themes.preset.inline
+                }) library:apply_theme(right_inline, "inline", "BackgroundColor3")
+
+                local right_bg = library:create("Frame", {
+                    Parent = right_inline,
+                    Position = dim2(0, 1, 0, 1),
+                    Size = dim2(1, -2, 1, -2),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = rgb(25, 25, 25)
+                })
+
+                local avatar_image = library:create("ImageLabel", {
+                    Parent = right_bg,
+                    Position = dim2(0.5, -40, 0, 10),
+                    Size = dim2(0, 80, 0, 80),
+                    BackgroundTransparency = 1,
+                    Image = "",
+                    BorderSizePixel = 0
+                })
+
+                local info_layout = library:create("UIListLayout", {
+                    Parent = right_bg,
+                    SortOrder = Enum.SortOrder.LayoutOrder,
+                    Padding = dim(0, 4),
+                    HorizontalAlignment = Enum.HorizontalAlignment.Center
+                })
+                
+                library:create("UIPadding", {
+                    Parent = right_bg,
+                    PaddingTop = dim(0, 100)
+                })
+
+                local function create_label(text)
+                    return library:create("TextLabel", {
+                        Parent = right_bg,
+                        FontFace = fonts["ProggyClean"],
+                        TextColor3 = rgb(255, 255, 255),
+                        BackgroundTransparency = 1,
+                        Size = dim2(1, 0, 0, 15),
+                        Text = text,
+                        TextSize = 12,
+                        TextXAlignment = Enum.TextXAlignment.Center,
+                        BorderSizePixel = 0
+                    })
+                end
+
+                local lbl_name = create_label("Name: N/A")
+                local lbl_display = create_label("Display: N/A")
+                local lbl_level = create_label("Level: N/A")
+                local lbl_status = create_label("Status: Neutral")
+
+                local whitelist_btn_outline = library:create("TextButton", {
+                    Parent = right_bg,
+                    Text = "",
+                    AutoButtonColor = false,
+                    Size = dim2(0, 120, 0, 20),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = themes.preset.outline
+                }) library:apply_theme(whitelist_btn_outline, "outline", "BackgroundColor3")
+
+                local whitelist_btn_inline = library:create("Frame", {
+                    Parent = whitelist_btn_outline,
+                    Position = dim2(0, 1, 0, 1),
+                    Size = dim2(1, -2, 1, -2),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = themes.preset.inline
+                }) library:apply_theme(whitelist_btn_inline, "inline", "BackgroundColor3")
+                
+                local whitelist_btn_accent = library:create("Frame", {
+                    Parent = whitelist_btn_inline,
+                    Position = dim2(0, 1, 0, 1),
+                    Size = dim2(1, -2, 1, -2),
+                    BorderColor3 = rgb(0, 0, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = themes.preset.accent
+                }) library:apply_theme(whitelist_btn_accent, "accent", "BackgroundColor3")
+
+                local whitelist_btn_text = library:create("TextLabel", {
+                    Parent = whitelist_btn_accent,
+                    FontFace = fonts["ProggyClean"],
+                    TextColor3 = rgb(255, 255, 255),
+                    BackgroundTransparency = 1,
+                    Size = dim2(1, 0, 1, 0),
+                    Text = "Toggle Whitelist",
+                    TextSize = 12,
+                    BorderSizePixel = 0
+                })
+
+                local function getLevel(player)
+                    if player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Level") then
+                        return tostring(player.leaderstats.Level.Value)
+                    end
+                    return "N/A"
+                end
+
+                local function selectPlayer(player)
+                    selected_player_name = player.Name
+                    
+                    for pl, btn in pairs(player_buttons) do
+                        if pl == player then
+                            btn.TextColor3 = themes.preset.accent or rgb(255, 255, 255)
+                        else
+                            btn.TextColor3 = rgb(170, 170, 170)
+                        end
+                    end
+                    
+                    lbl_name.Text = "Name: " .. player.Name
+                    lbl_display.Text = "Display: " .. player.DisplayName
+                    lbl_level.Text = "Level: " .. getLevel(player)
+                    
+                    task.spawn(function()
+                        local thumb, isReady = game:GetService("Players"):GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+                        if isReady and selected_player_name == player.Name then
+                            avatar_image.Image = thumb
+                        end
+                    end)
+                    
+                    cfg.callback(player.Name, "Select")
+                end
+
+                function cfg.update_status(status_text, color)
+                    lbl_status.Text = "Status: " .. status_text
+                    if color then
+                        lbl_status.TextColor3 = color
+                    end
+                end
+
+                local function addPlayer(player)
+                    if player == game:GetService("Players").LocalPlayer then return end
+                    if player_buttons[player] then return end
+                    
+                    local btn = library:create("TextButton", {
+                        Parent = scrolling_frame,
+                        FontFace = fonts["ProggyClean"],
+                        TextColor3 = rgb(170, 170, 170),
+                        BackgroundTransparency = 1,
+                        Size = dim2(1, 0, 0, 15),
+                        Text = player.Name,
+                        TextSize = 12,
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        BorderSizePixel = 0
+                    })
+                    
+                    player_buttons[player] = btn
+                    
+                    btn.MouseButton1Click:Connect(function()
+                        selectPlayer(player)
+                    end)
+                end
+
+                local function removePlayer(player)
+                    if player_buttons[player] then
+                        player_buttons[player]:Destroy()
+                        player_buttons[player] = nil
+                    end
+                    if selected_player_name == player.Name then
+                        selected_player_name = nil
+                        lbl_name.Text = "Name: N/A"
+                        lbl_display.Text = "Display: N/A"
+                        lbl_level.Text = "Level: N/A"
+                        lbl_status.Text = "Status: Neutral"
+                        avatar_image.Image = ""
+                    end
+                end
+
+                for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+                    addPlayer(p)
+                end
+
+                game:GetService("Players").PlayerAdded:Connect(addPlayer)
+                game:GetService("Players").PlayerRemoving:Connect(removePlayer)
+
+                whitelist_btn_outline.MouseButton1Click:Connect(function()
+                    if selected_player_name then
+                        cfg.callback(selected_player_name, "WhitelistToggle")
+                    end
+                end)
+
+                return setmetatable(cfg, library)
+            end
 
             function library:init_config(window) 
                 local textbox;
