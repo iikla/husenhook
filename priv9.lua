@@ -2680,4 +2680,432 @@
         Parent = self.page,
         BackgroundTransparency = 1,
         Size = dim2(1, 0, 1, 0),
-        Name = "
+        Name = "",
+        BorderSizePixel = 0,
+        BackgroundColor3 = rgb(255, 255, 255)
+    })
+    
+    library:create("UIListLayout", {
+        Parent = holder,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        FillDirection = Enum.FillDirection.Vertical
+    })
+
+    -- Top side (Player List)
+    local top_bg = library:create("Frame", {
+        Parent = holder,
+        BackgroundTransparency = 1,
+        Size = dim2(1, 0, 0.4, 0),
+        BorderSizePixel = 0
+    })
+
+    local scrolling_frame = library:create("ScrollingFrame", {
+        Parent = top_bg,
+        Active = true,
+        BackgroundTransparency = 1,
+        Size = dim2(1, 0, 1, 0),
+        ScrollBarThickness = 2,
+        ScrollBarImageColor3 = themes.preset["1"] or rgb(255, 255, 255),
+        CanvasSize = dim2(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        BorderSizePixel = 0,
+    }) library:apply_theme(scrolling_frame, "1", "ScrollBarImageColor3")
+
+    library:create("UIListLayout", {
+        Parent = scrolling_frame,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = dim(0, 2)
+    })
+    
+    library:create("UIPadding", {
+        Parent = scrolling_frame,
+        PaddingBottom = UDim.new(0, 2),
+        PaddingTop = UDim.new(0, 2),
+        PaddingLeft = UDim.new(0, 2),
+        PaddingRight = UDim.new(0, 2)
+    })
+
+    -- Bottom side (Player Details & Backpack)
+    local bottom_bg = library:create("Frame", {
+        Parent = holder,
+        BackgroundTransparency = 1,
+        Size = dim2(1, 0, 0.6, 0),
+        BorderSizePixel = 0
+    })
+    
+    library:create("UIListLayout", {
+        Parent = bottom_bg,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        FillDirection = Enum.FillDirection.Vertical
+    })
+
+    local player_card = library:create("Frame", {
+        Parent = bottom_bg,
+        BackgroundTransparency = 1,
+        Size = dim2(1, 0, 0, 80),
+        BorderSizePixel = 0
+    })
+    
+    local avatar_image = library:create("ImageLabel", {
+        Parent = player_card,
+        Position = dim2(0, 10, 0, 10),
+        Size = dim2(0, 60, 0, 60),
+        BackgroundTransparency = 1,
+        Image = "",
+        BorderSizePixel = 0
+    })
+
+    local info_container = library:create("Frame", {
+        Parent = player_card,
+        BackgroundTransparency = 1,
+        Position = dim2(0, 80, 0, 10),
+        Size = dim2(1, -90, 1, -20),
+        BorderSizePixel = 0
+    })
+    
+    library:create("UIListLayout", {
+        Parent = info_container,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = dim(0, 2)
+    })
+
+    local lbl_name = library:create("TextLabel", {
+        Parent = info_container,
+        Size = dim2(1, 0, 0, 12),
+        Text = "Name: N/A",
+        TextColor3 = rgb(255, 255, 255),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        BackgroundTransparency = 1,
+        FontFace = fonts["ProggyClean"],
+        TextSize = 12
+    })
+    local lbl_display = library:create("TextLabel", {
+        Parent = info_container,
+        Size = dim2(1, 0, 0, 12),
+        Text = "Display: N/A",
+        TextColor3 = rgb(170, 170, 170),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        BackgroundTransparency = 1,
+        FontFace = fonts["ProggyClean"],
+        TextSize = 12
+    })
+    local lbl_level = library:create("TextLabel", {
+        Parent = info_container,
+        Size = dim2(1, 0, 0, 12),
+        Text = "Level: N/A",
+        TextColor3 = rgb(170, 170, 170),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        BackgroundTransparency = 1,
+        FontFace = fonts["ProggyClean"],
+        TextSize = 12
+    })
+    
+    local whitelist_toggle_btn = library:create("TextButton", {
+        Parent = info_container,
+        BackgroundTransparency = 1,
+        Size = dim2(1, 0, 0, 12),
+        Text = "",
+        BorderSizePixel = 0
+    })
+    
+    local toggle_text = library:create("TextLabel", {
+        Parent = whitelist_toggle_btn,
+        FontFace = fonts["ProggyClean"],
+        TextColor3 = rgb(255, 255, 255),
+        Text = "Whitelist: Neutral",
+        BackgroundTransparency = 1,
+        Size = dim2(1, -16, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextSize = 12
+    })
+    
+    local toggle_box = library:create("Frame", {
+        AnchorPoint = vec2(1, 0),
+        Parent = whitelist_toggle_btn,
+        Position = dim2(1, -10, 0, 0),
+        Size = dim2(0, 12, 0, 12),
+        BackgroundColor3 = themes.preset.inline,
+        BorderColor3 = rgb(0,0,0),
+        BorderSizePixel = 0
+    })
+    
+    local toggle_fill = library:create("Frame", {
+        Parent = toggle_box,
+        Position = dim2(0, 1, 0, 1),
+        Size = dim2(1, -2, 1, -2),
+        BackgroundColor3 = themes.preset.inline,
+        BorderSizePixel = 0
+    })
+
+    function cfg.update_status(status_text, is_whitelisted)
+        if status_text then
+            toggle_text.Text = "Whitelist: " .. status_text
+        end
+        if is_whitelisted then
+            toggle_fill.BackgroundColor3 = themes.preset["1"]
+            library:apply_theme(toggle_fill, "1", "BackgroundColor3")
+        else
+            toggle_fill.BackgroundColor3 = themes.preset.inline
+            -- Remove from apply_theme table? We just override it.
+            -- Actually, simpler: when updating theme, it won't auto-update if unwhitelisted, 
+            -- but inline doesn't change often.
+        end
+    end
+
+    local backpack_container = library:create("Frame", {
+        Parent = bottom_bg,
+        BackgroundTransparency = 1,
+        Size = dim2(1, 0, 1, -80),
+        BorderSizePixel = 0
+    })
+    
+    local backpack_title = library:create("TextLabel", {
+        Parent = backpack_container,
+        Position = dim2(0, 10, 0, 0),
+        Size = dim2(1, -20, 0, 15),
+        Text = "Backpack / Equipped",
+        TextColor3 = themes.preset["1"],
+        TextXAlignment = Enum.TextXAlignment.Left,
+        BackgroundTransparency = 1,
+        FontFace = fonts["ProggyClean"],
+        TextSize = 12
+    }) library:apply_theme(backpack_title, "1", "TextColor3")
+
+    local backpack_list = library:create("ScrollingFrame", {
+        Parent = backpack_container,
+        Position = dim2(0, 10, 0, 20),
+        Size = dim2(1, -20, 1, -25),
+        BackgroundTransparency = 1,
+        ScrollBarThickness = 2,
+        ScrollBarImageColor3 = themes.preset["1"],
+        CanvasSize = dim2(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        BorderSizePixel = 0
+    }) library:apply_theme(backpack_list, "1", "ScrollBarImageColor3")
+    
+    library:create("UIListLayout", {
+        Parent = backpack_list,
+        Padding = dim(0, 2)
+    })
+
+    local function clearBackpack()
+        for _, child in pairs(backpack_list:GetChildren()) do
+            if child:IsA("TextLabel") then child:Destroy() end
+        end
+        for _, conn in pairs(backpack_connections) do
+            if conn then conn:Disconnect() end
+        end
+        table.clear(backpack_connections)
+        table.clear(backpack_labels)
+    end
+
+    local function refreshBackpack(player)
+        clearBackpack()
+        if not player then return end
+
+        local function addTool(tool, equipped)
+            if backpack_labels[tool] then return end
+            local lbl = library:create("TextLabel", {
+                Parent = backpack_list,
+                Size = dim2(1, 0, 0, 15),
+                BackgroundTransparency = 1,
+                Text = equipped and ("[Equipped] " .. tool.Name) or tool.Name,
+                TextColor3 = equipped and rgb(255, 255, 255) or rgb(170, 170, 170),
+                TextXAlignment = Enum.TextXAlignment.Left,
+                FontFace = fonts["ProggyClean"],
+                TextSize = 12
+            })
+            backpack_labels[tool] = lbl
+        end
+
+        local function removeTool(tool)
+            if backpack_labels[tool] then
+                backpack_labels[tool]:Destroy()
+                backpack_labels[tool] = nil
+            end
+        end
+
+        local function hookContainer(container, isEquipped)
+            if not container then return end
+            for _, tool in pairs(container:GetChildren()) do
+                if tool:IsA("Tool") then addTool(tool, isEquipped) end
+            end
+            table.insert(backpack_connections, container.ChildAdded:Connect(function(child)
+                if child:IsA("Tool") then addTool(child, isEquipped) end
+            end))
+            table.insert(backpack_connections, container.ChildRemoved:Connect(function(child)
+                if child:IsA("Tool") then removeTool(child) end
+            end))
+        end
+
+        if player.Character then
+            hookContainer(player.Character, true)
+        end
+        if player:FindFirstChild("Backpack") then
+            hookContainer(player.Backpack, false)
+        end
+
+        table.insert(backpack_connections, player.CharacterAdded:Connect(function(char)
+            refreshBackpack(player)
+        end))
+    end
+
+    local function updateDetails(playerName)
+        selected_player_name = playerName
+        local player = playerName and game:GetService("Players"):FindFirstChild(playerName)
+        
+        for pl, btn in pairs(player_buttons) do
+            if pl == player then
+                btn.TextColor3 = themes.preset["1"] or rgb(255, 255, 255)
+                library:apply_theme(btn, "1", "TextColor3")
+            else
+                btn.TextColor3 = rgb(170, 170, 170)
+            end
+        end
+
+        if player then
+            local thumbType = Enum.ThumbnailType.HeadShot
+            local thumbSize = Enum.ThumbnailSize.Size150x150
+            local success, img = pcall(function()
+                return game:GetService("Players"):GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
+            end)
+            if success and img then
+                avatar_image.Image = img
+            else
+                avatar_image.Image = ""
+            end
+
+            lbl_name.Text = "Name: " .. player.Name
+            lbl_display.Text = "Display: " .. player.DisplayName
+            
+            local lvl = "N/A"
+            if player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Level") then
+                lvl = tostring(player.leaderstats.Level.Value)
+            end
+            lbl_level.Text = "Level: " .. lvl
+
+            cfg.callback(player.Name, "Select")
+            refreshBackpack(player)
+        else
+            avatar_image.Image = ""
+            lbl_name.Text = "Name: N/A"
+            lbl_display.Text = "Display: N/A"
+            lbl_level.Text = "Level: N/A"
+            cfg.update_status("N/A", false)
+            clearBackpack()
+        end
+    end
+
+    local function addPlayer(player)
+        if player == game:GetService("Players").LocalPlayer then return end
+        
+        local btn = library:create("TextButton", {
+            Parent = scrolling_frame,
+            Size = dim2(1, 0, 0, 15),
+            BackgroundTransparency = 1,
+            Text = player.Name,
+            TextColor3 = rgb(170, 170, 170),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            FontFace = fonts["ProggyClean"],
+            TextSize = 12
+        })
+        
+        player_buttons[player] = btn
+        
+        btn.MouseButton1Click:Connect(function()
+            updateDetails(player.Name)
+        end)
+    end
+
+    local function removePlayer(player)
+        if player_buttons[player] then
+            player_buttons[player]:Destroy()
+            player_buttons[player] = nil
+        end
+        if selected_player_name == player.Name then
+            updateDetails(nil)
+        end
+    end
+
+    for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+        addPlayer(p)
+    end
+
+    game:GetService("Players").PlayerAdded:Connect(addPlayer)
+    game:GetService("Players").PlayerRemoving:Connect(removePlayer)
+
+    whitelist_toggle_btn.MouseButton1Click:Connect(function()
+        if selected_player_name then
+            cfg.callback(selected_player_name, "WhitelistToggle")
+        end
+    end)
+
+    return setmetatable(cfg, library)
+end
+
+
+            function library:init_config(window) 
+                local textbox;
+                local main = window:tab({name = "config"})
+                local section = main:column({}):section({name = "Settings", size = 1, default = true})
+                config_holder = section:dropdown({name = "Configs", options = {"Report", "This", "Error", "To", "Finobe"}, callback = function(option) if textbox then textbox.set(option) end end, flag = "config_name_list"}); library:update_config_list()
+                textbox = section:textbox({name = "Config name:", flag = "config_name_text"})
+                section:button({name = "Save", callback = function() writefile(library.directory .. "/husenhook/" .. flags["config_name_text"] .. ".cfg", library:get_config()) library:update_config_list() end}) 
+                section:button({name = "Load", callback = function() library:load_config(readfile(library.directory .. "/husenhook/" .. flags["config_name_text"] .. ".cfg"))  library:update_config_list() end})
+                section:button({name = "Delete", callback = function() delfile(library.directory .. "/husenhook/" .. flags["config_name_text"] .. ".cfg")  library:update_config_list() end})
+
+                local section = main:column({}):section({name = "Other", size = 1, default = true})
+                section:keybind({name = "Menu bind", callback = function(bool) window.toggle_menu(bool) end, default = true})
+                section:colorpicker({name = "Gradient 1", callback = function(color)                    
+                    library:update_theme("1", color)
+
+                    library.gradient.Color = rgbseq{
+                        rgbkey(0, themes.preset["1"]), 
+                        rgbkey(0.5, themes.preset["2"]),
+                        rgbkey(1, themes.preset["3"]),
+                    };
+
+                    library.watermark_gradient.Color = rgbseq{
+                        rgbkey(0, themes.preset["1"]), 
+                        rgbkey(0.5, themes.preset["2"]),
+                        rgbkey(1, themes.preset["3"]),
+                    };
+                end, color = themes.preset["1"]})
+                section:colorpicker({name = "Gradient 2", callback = function(color)
+                    library:update_theme("2", color)
+
+                    library.gradient.Color = rgbseq{
+                        rgbkey(0, themes.preset["1"]), 
+                        rgbkey(0.5, themes.preset["2"]),
+                        rgbkey(1, themes.preset["3"]),
+                    };
+
+                    library.watermark_gradient.Color = rgbseq{
+                        rgbkey(0, themes.preset["1"]), 
+                        rgbkey(0.5, themes.preset["2"]),
+                        rgbkey(1, themes.preset["3"]),
+                    };
+                end, color = themes.preset["2"]})
+                section:colorpicker({name = "Gradient 3", callback = function(color)
+                    library:update_theme("3", color)
+
+                    library.gradient.Color = rgbseq{
+                        rgbkey(0, themes.preset["1"]), 
+                        rgbkey(0.5, themes.preset["2"]),
+                        rgbkey(1, themes.preset["3"]),
+                    };
+
+                    library.watermark_gradient.Color = rgbseq{
+                        rgbkey(0, themes.preset["1"]), 
+                        rgbkey(0.5, themes.preset["2"]),
+                        rgbkey(1, themes.preset["3"]),
+                    };
+                end, color = themes.preset["3"]})
+
+                main:column({})
+            end
+        -- 
+    -- 
+-- 
+
+return library, notifications
