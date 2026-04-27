@@ -2675,7 +2675,7 @@
 
                 -- Main Holder
                 local holder = library:create("Frame", {
-                    Parent = self.holder,
+                    Parent = self.page,
                     BackgroundTransparency = 1,
                     Size = dim2(1, 0, 1, 0),
                     Name = "\0",
