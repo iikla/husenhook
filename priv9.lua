@@ -2740,7 +2740,7 @@
     })
 
     local player_card = library:create("Frame", {
-        Parent = bottom_bg,
+        Parent = right_bg,
         BackgroundTransparency = 1,
         Size = dim2(1, 0, 0, 80),
         BorderSizePixel = 0
@@ -2800,60 +2800,117 @@
         TextSize = 12
     })
     
-    local whitelist_toggle_btn = library:create("TextButton", {
+    -- Whitelist Dropdown
+    local whitelist_holder = library:create("Frame", {
         Parent = info_container,
         BackgroundTransparency = 1,
-        Size = dim2(1, 0, 0, 12),
-        Text = "",
-        BorderSizePixel = 0
-    })
-    
-    local toggle_text = library:create("TextLabel", {
-        Parent = whitelist_toggle_btn,
-        FontFace = fonts["ProggyClean"],
-        TextColor3 = rgb(255, 255, 255),
-        Text = "Whitelist: Neutral",
-        BackgroundTransparency = 1,
-        Size = dim2(1, -16, 1, 0),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextSize = 12
-    })
-    
-    local toggle_box = library:create("Frame", {
-        AnchorPoint = vec2(1, 0),
-        Parent = whitelist_toggle_btn,
-        Position = dim2(1, -10, 0, 0),
-        Size = dim2(0, 12, 0, 12),
-        BackgroundColor3 = themes.preset.inline,
-        BorderColor3 = rgb(0,0,0),
-        BorderSizePixel = 0
-    })
-    
-    local toggle_fill = library:create("Frame", {
-        Parent = toggle_box,
-        Position = dim2(0, 1, 0, 1),
-        Size = dim2(1, -2, 1, -2),
-        BackgroundColor3 = themes.preset.inline,
+        Size = dim2(1, 0, 0, 14),
         BorderSizePixel = 0
     })
 
+    local whitelist_label = library:create("TextLabel", {
+        Parent = whitelist_holder,
+        FontFace = fonts["ProggyClean"],
+        TextColor3 = rgb(255, 255, 255),
+        Text = "Status:",
+        BackgroundTransparency = 1,
+        Size = dim2(0, 40, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextSize = 12
+    })
+
+    local dropdown_btn = library:create("TextButton", {
+        Parent = whitelist_holder,
+        Position = dim2(0, 44, 0, 0),
+        Size = dim2(1, -44, 1, 0),
+        Text = "",
+        AutoButtonColor = false,
+        BorderSizePixel = 0,
+        BackgroundColor3 = themes.preset.inline
+    }) library:apply_theme(dropdown_btn, "inline", "BackgroundColor3")
+
+    local dropdown_text = library:create("TextLabel", {
+        Parent = dropdown_btn,
+        FontFace = fonts["ProggyClean"],
+        TextColor3 = rgb(170, 170, 170),
+        Text = "Neutral",
+        BackgroundTransparency = 1,
+        Size = dim2(1, -4, 1, 0),
+        Position = dim2(0, 4, 0, 0),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextSize = 12
+    })
+
+    local dropdown_open = false
+    local dropdown_options_frame = library:create("Frame", {
+        Parent = dropdown_btn,
+        Position = dim2(0, 0, 1, 2),
+        Size = dim2(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundColor3 = themes.preset.inline,
+        BorderSizePixel = 0,
+        Visible = false,
+        ZIndex = 10
+    }) library:apply_theme(dropdown_options_frame, "inline", "BackgroundColor3")
+
+    library:create("UIListLayout", {
+        Parent = dropdown_options_frame,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = dim(0, 1)
+    })
+
+    local status_colors = {
+        ["Neutral"] = rgb(170, 170, 170),
+        ["Whitelisted"] = rgb(0, 255, 0),
+    }
+
+    for _, opt in ipairs({"Neutral", "Whitelisted"}) do
+        local opt_btn = library:create("TextButton", {
+            Parent = dropdown_options_frame,
+            Size = dim2(1, 0, 0, 14),
+            Text = "",
+            AutoButtonColor = false,
+            BackgroundColor3 = rgb(30, 30, 30),
+            BorderSizePixel = 0,
+            ZIndex = 11
+        })
+        local opt_text = library:create("TextLabel", {
+            Parent = opt_btn,
+            FontFace = fonts["ProggyClean"],
+            TextColor3 = status_colors[opt],
+            Text = opt,
+            BackgroundTransparency = 1,
+            Size = dim2(1, -4, 1, 0),
+            Position = dim2(0, 4, 0, 0),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextSize = 12,
+            ZIndex = 11
+        })
+        opt_btn.MouseButton1Click:Connect(function()
+            dropdown_text.Text = opt
+            dropdown_text.TextColor3 = status_colors[opt]
+            dropdown_options_frame.Visible = false
+            dropdown_open = false
+            if selected_player_name then
+                cfg.callback(selected_player_name, "WhitelistToggle")
+            end
+        end)
+    end
+
+    dropdown_btn.MouseButton1Click:Connect(function()
+        dropdown_open = not dropdown_open
+        dropdown_options_frame.Visible = dropdown_open
+    end)
+
     function cfg.update_status(status_text, is_whitelisted)
         if status_text then
-            toggle_text.Text = "Whitelist: " .. status_text
-        end
-        if is_whitelisted then
-            toggle_fill.BackgroundColor3 = themes.preset["1"]
-            library:apply_theme(toggle_fill, "1", "BackgroundColor3")
-        else
-            toggle_fill.BackgroundColor3 = themes.preset.inline
-            -- Remove from apply_theme table? We just override it.
-            -- Actually, simpler: when updating theme, it won't auto-update if unwhitelisted, 
-            -- but inline doesn't change often.
+            dropdown_text.Text = status_text
+            dropdown_text.TextColor3 = status_colors[status_text] or rgb(170, 170, 170)
         end
     end
 
     local backpack_container = library:create("Frame", {
-        Parent = bottom_bg,
+        Parent = right_bg,
         BackgroundTransparency = 1,
         Size = dim2(1, 0, 1, -80),
         BorderSizePixel = 0
@@ -3033,12 +3090,6 @@
 
     game:GetService("Players").PlayerAdded:Connect(addPlayer)
     game:GetService("Players").PlayerRemoving:Connect(removePlayer)
-
-    whitelist_toggle_btn.MouseButton1Click:Connect(function()
-        if selected_player_name then
-            cfg.callback(selected_player_name, "WhitelistToggle")
-        end
-    end)
 
     return setmetatable(cfg, library)
 end
