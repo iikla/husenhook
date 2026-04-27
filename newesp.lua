@@ -283,12 +283,20 @@ function ESP:Update()
         local character = player.Character
         local isWhitelisted = table.find(self.Whitelist, player.Name) ~= nil or table.find(self.Whitelist, player.UserId) ~= nil
         
-        if not self.Settings.Enabled or (self.Settings.UseWhitelist and isWhitelisted) or not character then
+        if not self.Settings.Enabled or not character then
             HideAll(objs)
             continue
         end
 
-        RenderESP(objs, character, player.Name, self.Settings.Enemy, self.Settings.MaxDistance)
+        if self.Settings.UseWhitelist and isWhitelisted then
+            -- Render whitelisted players with green colors
+            RenderESP(objs, character, player.Name, self.Settings.Enemy, self.Settings.MaxDistance)
+            local green = Color3.fromRGB(0, 255, 0)
+            if objs.Box.Visible then objs.Box.Color = green end
+            if objs.Name.Visible then objs.Name.Color = green end
+        else
+            RenderESP(objs, character, player.Name, self.Settings.Enemy, self.Settings.MaxDistance)
+        end
     end
 
     for model, objs in pairs(self.NPCCache) do
