@@ -17,7 +17,7 @@ local ESP = {
     Settings = {
         Enabled = false,
         MaxDistance = 1500,
-        UseWhitelist = false,
+        UseWhitelist = true,
         TextFont = 2,
         TextSize = 13,
 
