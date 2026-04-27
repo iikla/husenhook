@@ -2714,7 +2714,7 @@
                 local scrolling_frame = library:create("ScrollingFrame", {
                     Parent = list_frame, Active = true, BackgroundTransparency = 1,
                     Position = dim2(0, 0, 0, 16), Size = dim2(1, 0, 1, -16),
-                    ScrollBarThickness = 2, ScrollBarImageColor3 = themes.preset["1"],
+                    ScrollBarThickness = 4, ScrollBarImageColor3 = themes.preset["1"],
                     CanvasSize = dim2(0, 0, 0, 0),
                     AutomaticCanvasSize = Enum.AutomaticSize.Y, BorderSizePixel = 0
                 }) library:apply_theme(scrolling_frame, "1", "ScrollBarImageColor3")
@@ -2786,16 +2786,11 @@
                 local dd_text = library:create("TextLabel", {
                     Parent = dd_btn, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(170,170,170), Text = "Neutral",
-                    BackgroundTransparency = 1, Size = dim2(1, -16, 1, 0),
+                    BackgroundTransparency = 1, Size = dim2(1, -4, 1, 0),
                     Position = dim2(0, 4, 0, 0),
                     TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
                 })
-                library:create("TextLabel", {
-                    Parent = dd_btn, FontFace = fonts["ProggyClean"],
-                    TextColor3 = rgb(255,255,255), Text = "+",
-                    BackgroundTransparency = 1, Size = dim2(0, 14, 1, 0),
-                    Position = dim2(1, -16, 0, 0), TextSize = 12
-                })
+
 
                 local dd_open = false
                 local dd_frame = library:create("Frame", {
@@ -2812,12 +2807,10 @@
 
                 local pcolors = {
                     ["Neutral"] = rgb(170,170,170),
-                    ["Friendly"] = rgb(0,255,255),
-                    ["Enemy"] = rgb(255,0,0),
                     ["Whitelisted"] = rgb(0,255,0),
                 }
 
-                for _, opt in ipairs({"Friendly", "Enemy", "Neutral", "Whitelisted"}) do
+                for _, opt in ipairs({"Neutral", "Whitelisted"}) do
                     local ob = library:create("TextButton", {
                         Parent = dd_frame, Size = dim2(1, 0, 0, 16),
                         Text = "", AutoButtonColor = false,
@@ -2905,7 +2898,8 @@
 
                 local function addPlayer(player)
                     if player_rows[player] then return end
-                    local is_lp = (player == lp)
+                    if player == lp then return end
+                    local is_lp = false
                     local row = library:create("TextButton", {
                         Parent = scrolling_frame, Size = dim2(1, 0, 0, 18),
                         BackgroundTransparency = 0.85, BackgroundColor3 = rgb(0,0,0),
