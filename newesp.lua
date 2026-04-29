@@ -18,7 +18,7 @@ local ESP = {
         Enabled = false,
         MaxDistance = 1500,
         UseWhitelist = true,
-        TextFont = 2,
+        TextFont = nil,
         TextSize = 13,
 
         Enemy = {
@@ -44,6 +44,30 @@ local ESP = {
     NPCCache = {},
     Connections = {}
 }
+
+-- Custom Font Loader (same pattern as library.lua's Register_Font)
+local function RegisterDrawingFont(name, url)
+    local fileName = name .. ".ttf"
+    if not isfile(fileName) then
+        local ok, data = pcall(function()
+            return game:HttpGet(url)
+        end)
+        if ok and data then
+            writefile(fileName, data)
+        else
+            warn("[ESP] Failed to download font: " .. name)
+            return nil
+        end
+    end
+    local font = Drawing.new("Font")
+    font.Data = fileName
+    return font
+end
+
+local TahomaBitmap = RegisterDrawingFont("TahomaBitmap", "https://github.com/iikla/husenhook/raw/refs/heads/main/fs-tahoma-8px.ttf")
+if TahomaBitmap then
+    ESP.Settings.TextFont = TahomaBitmap
+end
 
 local function Draw(class, props)
     local obj = Drawing.new(class)
@@ -236,9 +260,9 @@ local function RenderESP(objs, character, name, config, maxDist)
 
     if config.Name.Enabled then
         objs.Name.Text  = name
-        objs.Name.Font  = ESP.Settings.TextFont
         objs.Name.Size  = ESP.Settings.TextSize
         objs.Name.Color = config.Name.Color
+        objs.Name.Font = ESP.Settings.TextFont
         objs.Name.Position = V2(boxX + boxW / 2, boxY - objs.Name.TextBounds.Y - 2)
         objs.Name.Visible  = true
     else
@@ -251,9 +275,9 @@ local function RenderESP(objs, character, name, config, maxDist)
         local tool = character:FindFirstChildOfClass("Tool")
         if tool then
             objs.Weapon.Text  = tool.Name
-            objs.Weapon.Font  = ESP.Settings.TextFont
             objs.Weapon.Size  = ESP.Settings.TextSize
             objs.Weapon.Color = config.Weapon.Color
+            objs.Weapon.Font = ESP.Settings.TextFont
             objs.Weapon.Position = V2(boxX + boxW / 2, bottomY)
             objs.Weapon.Visible = true
             bottomY = bottomY + objs.Weapon.TextBounds.Y + 1
@@ -266,9 +290,9 @@ local function RenderESP(objs, character, name, config, maxDist)
 
     if config.Distance.Enabled then
         objs.Distance.Text  = "[" .. floor(dist + 0.5) .. " studs]"
-        objs.Distance.Font  = ESP.Settings.TextFont
         objs.Distance.Size  = ESP.Settings.TextSize
         objs.Distance.Color = config.Distance.Color
+        objs.Distance.Font = ESP.Settings.TextFont
         objs.Distance.Position = V2(boxX + boxW / 2, bottomY)
         objs.Distance.Visible  = true
     else
