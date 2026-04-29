@@ -222,14 +222,14 @@
                 Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/tahoma_bold.ttf"),
             })
 
-            local ProggyClean = Register_Font("ProggyClean", 200, "normal", {
-                Id = "ProggyClean.ttf",
-                Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf")
+            local TahomaBitmap = Register_Font("TahomaBitmap", 200, "normal", {
+                Id = "TahomaBitmap.ttf",
+                Font = game:HttpGet("https://github.com/iikla/husenhook/raw/refs/heads/main/fs-tahoma-8px.ttf")
             })
             
             fonts = {
                 ["TahomaBold"] = Font.new(ProggyTiny, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
-                ["ProggyClean"] = Font.new(ProggyClean, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+                ["TahomaBitmap"] = Font.new(TahomaBitmap, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
             }
         end
     --
@@ -566,7 +566,7 @@
                 });
                 
                 local ui_title = library:create("TextLabel", {
-                    FontFace = fonts["TahomaBold"];
+                    FontFace = fonts["TahomaBitmap"];
                     TextColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     Text = cfg.name;
@@ -625,7 +625,7 @@
             -- Instances 
                 -- Tab Button
                     local tab_button = library:create("TextButton", {
-                        FontFace = fonts["ProggyClean"];
+                        FontFace = fonts["TahomaBitmap"];
                         TextColor3 = rgb(170, 170, 170);
                         BorderColor3 = rgb(0, 0, 0);
                         Text = cfg.name;
@@ -768,7 +768,7 @@
                 });
 
                 library:create("TextLabel", {
-                    FontFace = fonts["ProggyClean"];
+                    FontFace = fonts["TahomaBitmap"];
                     TextColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     Text = cfg.name;
@@ -849,7 +849,7 @@
                 });
 
                 local text_title = library:create("TextLabel", {
-                    FontFace = fonts["ProggyClean"];
+                    FontFace = fonts["TahomaBitmap"];
                     TextColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     Text = cfg.name;
@@ -982,7 +982,7 @@
                 });
                 
                 local title = library:create("TextLabel", {
-                    FontFace = fonts["TahomaBold"];
+                    FontFace = fonts["TahomaBitmap"];
                     TextColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     Text = cfg.name;
@@ -1035,7 +1035,7 @@
                         });
                         
                         library:create("TextLabel", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -1210,7 +1210,7 @@
                 -- Functions
                     function cfg.render_option(text) 
                         local text = library:create("TextButton", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             TextColor3 = rgb(170, 170, 170);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = text;
@@ -1310,7 +1310,7 @@
                     });
                     
                     local eeeee = library:create("TextLabel", {
-                        FontFace = fonts["ProggyClean"];
+                        FontFace = fonts["TahomaBitmap"];
                         TextColor3 = rgb(255, 255, 255);
                         RichText = true;
                         BorderColor3 = rgb(0, 0, 0);
@@ -1467,7 +1467,7 @@
                         });
                         
                         local text = library:create("TextLabel", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -1482,7 +1482,7 @@
                         });
                         
                         local title = library:create("TextLabel", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -1544,7 +1544,7 @@
                 -- Functions
                     function cfg.render_option(text) 
                         local title = library:create("TextButton", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             AutoButtonColor = false;
                             TextColor3 = rgb(170, 170, 170);
                             BorderColor3 = rgb(0, 0, 0);
@@ -1703,7 +1703,7 @@
                         
                         if not is_inline then
                             library:create("TextLabel", {
-                                FontFace = fonts["ProggyClean"];
+                                FontFace = fonts["TahomaBitmap"];
                                 TextColor3 = rgb(255, 255, 255);
                                 BorderColor3 = rgb(0, 0, 0);
                                 Text = cfg.name;
@@ -1769,7 +1769,7 @@
                         }); library:apply_theme(textbox_holder, tostring(self.count), "BackgroundColor3")
                         
                         local textbox = library:create("TextBox", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = "";
@@ -1795,7 +1795,7 @@
                         }); library:apply_theme(hex_textbox_holder, tostring(self.count), "BackgroundColor3")
                         
                         local hex_textbox = library:create("TextBox", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = "";
@@ -2272,7 +2272,7 @@
                     local input = library:create("TextBox", {
                         Parent = frame,
                         Name = "",
-                        FontFace = fonts["ProggyClean"],
+                        FontFace = fonts["TahomaBitmap"],
                         TextTruncate = Enum.TextTruncate.AtEnd,
                         TextSize = 12,
                         Text = "",
@@ -2365,7 +2365,7 @@
                         });
                         
                         local text = library:create("TextLabel", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -2380,7 +2380,7 @@
                         });
                         
                         local title = library:create("TextLabel", {
-                            FontFace = fonts["ProggyClean"];
+                            FontFace = fonts["TahomaBitmap"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -2441,7 +2441,7 @@
                         
                         for _, v in options do
                             local option = library:create("TextButton", {
-                                FontFace = fonts["ProggyClean"];
+                                FontFace = fonts["TahomaBitmap"];
                                 TextColor3 = rgb(170, 170, 170);
                                 BorderColor3 = rgb(0, 0, 0);
                                 Text = v;
@@ -2642,7 +2642,7 @@
                     }); library:apply_theme(frame_inline, "inline", "BackgroundColor3")
                     
                     local text = library:create("TextLabel", {
-                        FontFace = fonts["ProggyClean"];
+                        FontFace = fonts["TahomaBitmap"];
                         TextColor3 = rgb(255, 255, 255);
                         BorderColor3 = rgb(0, 0, 0);
                         Text = cfg.name;
@@ -2667,389 +2667,286 @@
             end 
 
             function library:playerlist(options)
-    local cfg = {
-        callback = options.callback or function() end,
-    }
-    local selected_player_name = nil
-    local player_buttons = {}
-    local backpack_labels = {}
-    local backpack_connections = {}
+                local cfg = { callback = options.callback or function() end }
+                local selected_player_name = nil
+                local player_rows = {}
+                local lp = game:GetService("Players").LocalPlayer
 
-    -- Main Holder
-    local holder = library:create("Frame", {
-        Parent = self.page,
-        BackgroundTransparency = 1,
-        Size = dim2(1, 0, 1, 0),
-        Name = " ",
-        BorderSizePixel = 0,
-        BackgroundColor3 = rgb(255, 255, 255)
-    })
-    
-    library:create("UIListLayout", {
-        Parent = holder,
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        FillDirection = Enum.FillDirection.Vertical
-    })
+                local holder = library:create("Frame", {
+                    Parent = self.page, BackgroundTransparency = 1,
+                    Size = dim2(1, 0, 1, 0), BorderSizePixel = 0
+                })
 
-    -- Top side (Player List)
-    local top_bg = library:create("Frame", {
-        Parent = holder,
-        BackgroundTransparency = 1,
-        Size = dim2(1, 0, 0.4, 0),
-        BorderSizePixel = 0
-    })
+                -- List area (top portion)
+                local list_frame = library:create("Frame", {
+                    Parent = holder, BackgroundTransparency = 1,
+                    Size = dim2(1, 0, 1, -120), BorderSizePixel = 0
+                })
 
-    local scrolling_frame = library:create("ScrollingFrame", {
-        Parent = top_bg,
-        Active = true,
-        BackgroundTransparency = 1,
-        Size = dim2(1, 0, 1, 0),
-        ScrollBarThickness = 2,
-        ScrollBarImageColor3 = themes.preset["1"] or rgb(255, 255, 255),
-        CanvasSize = dim2(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y,
-        BorderSizePixel = 0,
-    }) library:apply_theme(scrolling_frame, "1", "ScrollBarImageColor3")
+                -- Column headers
+                local header = library:create("Frame", {
+                    Parent = list_frame, BackgroundTransparency = 0.8,
+                    BackgroundColor3 = rgb(0, 0, 0),
+                    Size = dim2(1, 0, 0, 16), BorderSizePixel = 0
+                })
+                library:create("TextLabel", {
+                    Parent = header, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(255,255,255), Text = "Name",
+                    BackgroundTransparency = 1, Size = dim2(0.45, 0, 1, 0),
+                    Position = dim2(0, 4, 0, 0),
+                    TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                })
+                library:create("TextLabel", {
+                    Parent = header, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(255,255,255), Text = "UserId",
+                    BackgroundTransparency = 1, Size = dim2(0.3, 0, 1, 0),
+                    Position = dim2(0.45, 0, 0, 0),
+                    TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                })
+                library:create("TextLabel", {
+                    Parent = header, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(255,255,255), Text = "Priority",
+                    BackgroundTransparency = 1, Size = dim2(0.25, -4, 1, 0),
+                    Position = dim2(0.75, 0, 0, 0),
+                    TextXAlignment = Enum.TextXAlignment.Right, TextSize = 12
+                })
 
-    library:create("UIListLayout", {
-        Parent = scrolling_frame,
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = dim(0, 2)
-    })
-    
-    library:create("UIPadding", {
-        Parent = scrolling_frame,
-        PaddingBottom = UDim.new(0, 2),
-        PaddingTop = UDim.new(0, 2),
-        PaddingLeft = UDim.new(0, 2),
-        PaddingRight = UDim.new(0, 2)
-    })
+                local scrolling_frame = library:create("ScrollingFrame", {
+                    Parent = list_frame, Active = true, BackgroundTransparency = 1,
+                    Position = dim2(0, 0, 0, 16), Size = dim2(1, 0, 1, -16),
+                    ScrollBarThickness = 4, ScrollBarImageColor3 = themes.preset["1"],
+                    CanvasSize = dim2(0, 0, 0, 0),
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y, BorderSizePixel = 0
+                }) library:apply_theme(scrolling_frame, "1", "ScrollBarImageColor3")
 
-    -- Bottom side (Player Details & Backpack)
-    local bottom_bg = library:create("Frame", {
-        Parent = holder,
-        BackgroundTransparency = 1,
-        Size = dim2(1, 0, 0.6, 0),
-        BorderSizePixel = 0
-    })
-    
-    library:create("UIListLayout", {
-        Parent = bottom_bg,
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        FillDirection = Enum.FillDirection.Vertical
-    })
+                library:create("UIListLayout", {
+                    Parent = scrolling_frame, SortOrder = Enum.SortOrder.LayoutOrder,
+                    Padding = dim(0, 1)
+                })
 
-    local player_card = library:create("Frame", {
-        Parent = bottom_bg,
-        BackgroundTransparency = 1,
-        Size = dim2(1, 0, 0, 80),
-        BorderSizePixel = 0
-    })
-    
-    local avatar_image = library:create("ImageLabel", {
-        Parent = player_card,
-        Position = dim2(0, 10, 0, 10),
-        Size = dim2(0, 60, 0, 60),
-        BackgroundTransparency = 1,
-        Image = "",
-        BorderSizePixel = 0
-    })
+                -- Bottom info card
+                local info_card = library:create("Frame", {
+                    Parent = holder, BackgroundTransparency = 0.8,
+                    BackgroundColor3 = rgb(0, 0, 0),
+                    Position = dim2(0, 0, 1, -120), Size = dim2(1, 0, 0, 120),
+                    BorderSizePixel = 0
+                })
 
-    local info_container = library:create("Frame", {
-        Parent = player_card,
-        BackgroundTransparency = 1,
-        Position = dim2(0, 80, 0, 10),
-        Size = dim2(1, -90, 1, -20),
-        BorderSizePixel = 0
-    })
-    
-    library:create("UIListLayout", {
-        Parent = info_container,
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        FillDirection = Enum.FillDirection.Horizontal,
-        VerticalAlignment = Enum.VerticalAlignment.Center,
-        Padding = dim(0, 15)
-    })
+                local avatar_image = library:create("ImageLabel", {
+                    Parent = info_card, Position = dim2(0, 8, 0, 8),
+                    Size = dim2(0, 64, 0, 64), BackgroundColor3 = rgb(30,30,30),
+                    Image = "", BorderSizePixel = 0
+                })
 
-    local lbl_name = library:create("TextLabel", {
-        Parent = info_container,
-        Size = dim2(0, 0, 1, 0),
-        AutomaticSize = Enum.AutomaticSize.X,
-        Text = "Name: N/A",
-        TextColor3 = rgb(255, 255, 255),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        BackgroundTransparency = 1,
-        FontFace = fonts["ProggyClean"],
-        TextSize = 12
-    })
-    local lbl_display = library:create("TextLabel", {
-        Parent = info_container,
-        Size = dim2(0, 0, 1, 0),
-        AutomaticSize = Enum.AutomaticSize.X,
-        Text = "Display: N/A",
-        TextColor3 = rgb(170, 170, 170),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        BackgroundTransparency = 1,
-        FontFace = fonts["ProggyClean"],
-        TextSize = 12
-    })
-    local lbl_level = library:create("TextLabel", {
-        Parent = info_container,
-        Size = dim2(0, 0, 1, 0),
-        AutomaticSize = Enum.AutomaticSize.X,
-        Text = "Level: N/A",
-        TextColor3 = rgb(170, 170, 170),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        BackgroundTransparency = 1,
-        FontFace = fonts["ProggyClean"],
-        TextSize = 12
-    })
-    
-    local whitelist_toggle_btn = library:create("TextButton", {
-        Parent = info_container,
-        BackgroundTransparency = 1,
-        Size = dim2(0, 100, 1, 0),
-        AutomaticSize = Enum.AutomaticSize.X,
-        Text = "",
-        BorderSizePixel = 0
-    })
-    
-    local toggle_text = library:create("TextLabel", {
-        Parent = whitelist_toggle_btn,
-        FontFace = fonts["ProggyClean"],
-        TextColor3 = rgb(255, 255, 255),
-        Text = "Whitelist: Neutral",
-        BackgroundTransparency = 1,
-        Size = dim2(0, 0, 1, 0),
-        AutomaticSize = Enum.AutomaticSize.X,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextSize = 12
-    })
-    
-    local toggle_box = library:create("Frame", {
-        AnchorPoint = vec2(0, 0.5),
-        Parent = whitelist_toggle_btn,
-        Position = dim2(1, 5, 0.5, 0),
-        Size = dim2(0, 12, 0, 12),
-        BackgroundColor3 = themes.preset.inline,
-        BorderColor3 = rgb(0,0,0),
-        BorderSizePixel = 0
-    })
-    
-    local toggle_fill = library:create("Frame", {
-        Parent = toggle_box,
-        Position = dim2(0, 1, 0, 1),
-        Size = dim2(1, -2, 1, -2),
-        BackgroundColor3 = themes.preset.inline,
-        BorderSizePixel = 0
-    })
+                local ix = 82
+                local lbl_name = library:create("TextLabel", {
+                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(255,255,255), Text = "Name: ???",
+                    BackgroundTransparency = 1, Position = dim2(0, ix, 0, 10),
+                    Size = dim2(0.5, -ix, 0, 14),
+                    TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                })
+                local lbl_display = library:create("TextLabel", {
+                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(170,170,170), Text = "Display Name: ???",
+                    BackgroundTransparency = 1, Position = dim2(0, ix, 0, 26),
+                    Size = dim2(0.5, -ix, 0, 14),
+                    TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                })
+                local lbl_uid = library:create("TextLabel", {
+                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(170,170,170), Text = "UserId: ???",
+                    BackgroundTransparency = 1, Position = dim2(0, ix, 0, 42),
+                    Size = dim2(0.5, -ix, 0, 14),
+                    TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                })
+                local lbl_level = library:create("TextLabel", {
+                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(170,170,170), Text = "Level: ???",
+                    BackgroundTransparency = 1, Position = dim2(0, ix, 0, 58),
+                    Size = dim2(0.5, -ix, 0, 14),
+                    TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                })
 
-    function cfg.update_status(status_text, is_whitelisted)
-        if status_text then
-            toggle_text.Text = "Whitelist: " .. status_text
-        end
-        if is_whitelisted then
-            toggle_fill.BackgroundColor3 = themes.preset["1"]
-            library:apply_theme(toggle_fill, "1", "BackgroundColor3")
-        else
-            toggle_fill.BackgroundColor3 = themes.preset.inline
-            -- Remove from apply_theme table? We just override it.
-            -- Actually, simpler: when updating theme, it won't auto-update if unwhitelisted, 
-            -- but inline doesn't change often.
-        end
-    end
+                -- Priority dropdown
+                library:create("TextLabel", {
+                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(255,255,255), Text = "Priority",
+                    BackgroundTransparency = 1, Position = dim2(0.55, 0, 0, 10),
+                    Size = dim2(0.4, 0, 0, 14),
+                    TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                })
 
-    local backpack_container = library:create("Frame", {
-        Parent = bottom_bg,
-        BackgroundTransparency = 1,
-        Size = dim2(1, 0, 1, -80),
-        BorderSizePixel = 0
-    })
-    
-    local backpack_title = library:create("TextLabel", {
-        Parent = backpack_container,
-        Position = dim2(0, 10, 0, 0),
-        Size = dim2(1, -20, 0, 15),
-        Text = "Backpack / Equipped",
-        TextColor3 = themes.preset["1"],
-        TextXAlignment = Enum.TextXAlignment.Left,
-        BackgroundTransparency = 1,
-        FontFace = fonts["ProggyClean"],
-        TextSize = 12
-    }) library:apply_theme(backpack_title, "1", "TextColor3")
+                local dd_btn = library:create("TextButton", {
+                    Parent = info_card, Position = dim2(0.55, 0, 0, 28),
+                    Size = dim2(0.4, 0, 0, 16), Text = "", AutoButtonColor = false,
+                    BorderSizePixel = 0, BackgroundColor3 = themes.preset.inline
+                }) library:apply_theme(dd_btn, "inline", "BackgroundColor3")
 
-    local backpack_list = library:create("ScrollingFrame", {
-        Parent = backpack_container,
-        Position = dim2(0, 10, 0, 20),
-        Size = dim2(1, -20, 1, -25),
-        BackgroundTransparency = 1,
-        ScrollBarThickness = 2,
-        ScrollBarImageColor3 = themes.preset["1"],
-        CanvasSize = dim2(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y,
-        BorderSizePixel = 0
-    }) library:apply_theme(backpack_list, "1", "ScrollBarImageColor3")
-    
-    library:create("UIListLayout", {
-        Parent = backpack_list,
-        Padding = dim(0, 2)
-    })
+                local dd_text = library:create("TextLabel", {
+                    Parent = dd_btn, FontFace = fonts["TahomaBitmap"],
+                    TextColor3 = rgb(170,170,170), Text = "Neutral",
+                    BackgroundTransparency = 1, Size = dim2(1, -4, 1, 0),
+                    Position = dim2(0, 4, 0, 0),
+                    TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                })
 
-    local function clearBackpack()
-        for _, child in pairs(backpack_list:GetChildren()) do
-            if child:IsA("TextLabel") then child:Destroy() end
-        end
-        for _, conn in pairs(backpack_connections) do
-            if conn then conn:Disconnect() end
-        end
-        table.clear(backpack_connections)
-        table.clear(backpack_labels)
-    end
 
-    local function refreshBackpack(player)
-        clearBackpack()
-        if not player then return end
+                local dd_open = false
+                local dd_frame = library:create("Frame", {
+                    Parent = dd_btn, Position = dim2(0, 0, 1, 2),
+                    Size = dim2(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundColor3 = themes.preset.inline, BorderSizePixel = 0,
+                    Visible = false, ZIndex = 10
+                }) library:apply_theme(dd_frame, "inline", "BackgroundColor3")
 
-        local function addTool(tool, equipped)
-            if backpack_labels[tool] then return end
-            local lbl = library:create("TextLabel", {
-                Parent = backpack_list,
-                Size = dim2(1, 0, 0, 15),
-                BackgroundTransparency = 1,
-                Text = equipped and ("[Equipped] " .. tool.Name) or tool.Name,
-                TextColor3 = equipped and rgb(255, 255, 255) or rgb(170, 170, 170),
-                TextXAlignment = Enum.TextXAlignment.Left,
-                FontFace = fonts["ProggyClean"],
-                TextSize = 12
-            })
-            backpack_labels[tool] = lbl
-        end
+                library:create("UIListLayout", {
+                    Parent = dd_frame, SortOrder = Enum.SortOrder.LayoutOrder,
+                    Padding = dim(0, 1)
+                })
 
-        local function removeTool(tool)
-            if backpack_labels[tool] then
-                backpack_labels[tool]:Destroy()
-                backpack_labels[tool] = nil
+                local pcolors = {
+                    ["Neutral"] = rgb(170,170,170),
+                    ["Whitelisted"] = rgb(0,255,0),
+                }
+
+                for _, opt in ipairs({"Neutral", "Whitelisted"}) do
+                    local ob = library:create("TextButton", {
+                        Parent = dd_frame, Size = dim2(1, 0, 0, 16),
+                        Text = "", AutoButtonColor = false,
+                        BackgroundColor3 = rgb(30,30,30), BorderSizePixel = 0, ZIndex = 11
+                    })
+                    library:create("TextLabel", {
+                        Parent = ob, FontFace = fonts["TahomaBitmap"],
+                        TextColor3 = pcolors[opt], Text = opt,
+                        BackgroundTransparency = 1, Size = dim2(1, -4, 1, 0),
+                        Position = dim2(0, 4, 0, 0),
+                        TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12, ZIndex = 11
+                    })
+                    ob.MouseButton1Click:Connect(function()
+                        dd_text.Text = opt
+                        dd_text.TextColor3 = pcolors[opt]
+                        dd_frame.Visible = false
+                        dd_open = false
+                        if selected_player_name then
+                            local p = game:GetService("Players"):FindFirstChild(selected_player_name)
+                            if p and player_rows[p] then
+                                player_rows[p].priority.Text = opt
+                                player_rows[p].priority.TextColor3 = pcolors[opt]
+                            end
+                            cfg.callback(selected_player_name, opt == "Whitelisted" and "WhitelistToggle" or "PriorityChange", opt)
+                        end
+                    end)
+                end
+
+                dd_btn.MouseButton1Click:Connect(function()
+                    dd_open = not dd_open
+                    dd_frame.Visible = dd_open
+                end)
+
+                function cfg.update_status(st, _)
+                    if st then
+                        dd_text.Text = st
+                        dd_text.TextColor3 = pcolors[st] or rgb(170,170,170)
+                        if selected_player_name then
+                            local p = game:GetService("Players"):FindFirstChild(selected_player_name)
+                            if p and player_rows[p] then
+                                player_rows[p].priority.Text = st
+                                player_rows[p].priority.TextColor3 = pcolors[st] or rgb(170,170,170)
+                            end
+                        end
+                    end
+                end
+
+                local function updateDetails(playerName)
+                    selected_player_name = playerName
+                    local player = playerName and game:GetService("Players"):FindFirstChild(playerName)
+                    for pl, data in pairs(player_rows) do
+                        data.name_label.TextColor3 = (pl == player) and (themes.preset["1"] or rgb(255,255,255)) or rgb(170,170,170)
+                    end
+                    if player then
+                        task.spawn(function()
+                            local ok, img = pcall(function()
+                                return game:GetService("Players"):GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+                            end)
+                            if ok and img and selected_player_name == player.Name then avatar_image.Image = img end
+                        end)
+                        lbl_name.Text = "Name: " .. player.Name
+                        lbl_display.Text = "Display Name: " .. player.DisplayName
+                        lbl_uid.Text = "UserId: " .. tostring(player.UserId)
+                        local lvl = "???"
+                        if player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Level") then
+                            lvl = tostring(player.leaderstats.Level.Value)
+                        end
+                        lbl_level.Text = "Level: " .. lvl
+                        if player_rows[player] then
+                            local cur = player_rows[player].priority.Text
+                            dd_text.Text = cur
+                            dd_text.TextColor3 = pcolors[cur] or rgb(170,170,170)
+                        end
+                        cfg.callback(player.Name, "Select")
+                    else
+                        avatar_image.Image = ""
+                        lbl_name.Text = "Name: ???"
+                        lbl_display.Text = "Display Name: ???"
+                        lbl_uid.Text = "UserId: ???"
+                        lbl_level.Text = "Level: ???"
+                        dd_text.Text = "Neutral"
+                        dd_text.TextColor3 = pcolors["Neutral"]
+                    end
+                end
+
+                local function addPlayer(player)
+                    if player_rows[player] then return end
+                    if player == lp then return end
+                    local is_lp = false
+                    local row = library:create("TextButton", {
+                        Parent = scrolling_frame, Size = dim2(1, 0, 0, 18),
+                        BackgroundTransparency = 0.85, BackgroundColor3 = rgb(0,0,0),
+                        Text = "", AutoButtonColor = false, BorderSizePixel = 0
+                    })
+                    local nl = library:create("TextLabel", {
+                        Parent = row, FontFace = fonts["TahomaBitmap"],
+                        TextColor3 = rgb(170,170,170), Text = player.Name,
+                        BackgroundTransparency = 1, Size = dim2(0.45, 0, 1, 0),
+                        Position = dim2(0, 4, 0, 0),
+                        TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                    })
+                    library:create("TextLabel", {
+                        Parent = row, FontFace = fonts["TahomaBitmap"],
+                        TextColor3 = rgb(120,120,120), Text = tostring(player.UserId),
+                        BackgroundTransparency = 1, Size = dim2(0.3, 0, 1, 0),
+                        Position = dim2(0.45, 0, 0, 0),
+                        TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
+                    })
+                    local pl = library:create("TextLabel", {
+                        Parent = row, FontFace = fonts["TahomaBitmap"],
+                        TextColor3 = is_lp and rgb(0,100,255) or rgb(170,170,170),
+                        Text = is_lp and "LocalPlayer" or "Neutral",
+                        BackgroundTransparency = 1, Size = dim2(0.25, -4, 1, 0),
+                        Position = dim2(0.75, 0, 0, 0),
+                        TextXAlignment = Enum.TextXAlignment.Right, TextSize = 12
+                    })
+                    player_rows[player] = { row = row, name_label = nl, priority = pl }
+                    if not is_lp then
+                        row.MouseButton1Click:Connect(function() updateDetails(player.Name) end)
+                    end
+                end
+
+                local function removePlayer(player)
+                    if player_rows[player] then
+                        player_rows[player].row:Destroy()
+                        player_rows[player] = nil
+                    end
+                    if selected_player_name == player.Name then updateDetails(nil) end
+                end
+
+                for _, p in pairs(game:GetService("Players"):GetPlayers()) do addPlayer(p) end
+                game:GetService("Players").PlayerAdded:Connect(addPlayer)
+                game:GetService("Players").PlayerRemoving:Connect(removePlayer)
+
+                return setmetatable(cfg, library)
             end
-        end
-
-        local function hookContainer(container, isEquipped)
-            if not container then return end
-            for _, tool in pairs(container:GetChildren()) do
-                if tool:IsA("Tool") then addTool(tool, isEquipped) end
-            end
-            table.insert(backpack_connections, container.ChildAdded:Connect(function(child)
-                if child:IsA("Tool") then addTool(child, isEquipped) end
-            end))
-            table.insert(backpack_connections, container.ChildRemoved:Connect(function(child)
-                if child:IsA("Tool") then removeTool(child) end
-            end))
-        end
-
-        if player.Character then
-            hookContainer(player.Character, true)
-        end
-        if player:FindFirstChild("Backpack") then
-            hookContainer(player.Backpack, false)
-        end
-
-        table.insert(backpack_connections, player.CharacterAdded:Connect(function(char)
-            refreshBackpack(player)
-        end))
-    end
-
-    local function updateDetails(playerName)
-        selected_player_name = playerName
-        local player = game:GetService("Players"):FindFirstChild(playerName)
-        
-        for pl, btn in pairs(player_buttons) do
-            if pl == player then
-                btn.TextColor3 = themes.preset["1"] or rgb(255, 255, 255)
-                library:apply_theme(btn, "1", "TextColor3")
-            else
-                btn.TextColor3 = rgb(170, 170, 170)
-            end
-        end
-
-        if player then
-            local thumbType = Enum.ThumbnailType.HeadShot
-            local thumbSize = Enum.ThumbnailSize.Size150x150
-            local success, img = pcall(function()
-                return game:GetService("Players"):GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
-            end)
-            if success and img then
-                avatar_image.Image = img
-            else
-                avatar_image.Image = ""
-            end
-
-            lbl_name.Text = "Name: " .. player.Name
-            lbl_display.Text = "Display: " .. player.DisplayName
-            
-            local lvl = "N/A"
-            if player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Level") then
-                lvl = tostring(player.leaderstats.Level.Value)
-            end
-            lbl_level.Text = "Level: " .. lvl
-
-            cfg.callback(player.Name, "Select")
-            refreshBackpack(player)
-        else
-            avatar_image.Image = ""
-            lbl_name.Text = "Name: N/A"
-            lbl_display.Text = "Display: N/A"
-            lbl_level.Text = "Level: N/A"
-            cfg.update_status("N/A", false)
-            clearBackpack()
-        end
-    end
-
-    local function addPlayer(player)
-        if player == game:GetService("Players").LocalPlayer then return end
-        
-        local btn = library:create("TextButton", {
-            Parent = scrolling_frame,
-            Size = dim2(1, 0, 0, 15),
-            BackgroundTransparency = 1,
-            Text = player.Name,
-            TextColor3 = rgb(170, 170, 170),
-            TextXAlignment = Enum.TextXAlignment.Left,
-            FontFace = fonts["ProggyClean"],
-            TextSize = 12
-        })
-        
-        player_buttons[player] = btn
-        
-        btn.MouseButton1Click:Connect(function()
-            updateDetails(player.Name)
-        end)
-    end
-
-    local function removePlayer(player)
-        if player_buttons[player] then
-            player_buttons[player]:Destroy()
-            player_buttons[player] = nil
-        end
-        if selected_player_name == player.Name then
-            updateDetails(nil)
-        end
-    end
-
-    for _, p in pairs(game:GetService("Players"):GetPlayers()) do
-        addPlayer(p)
-    end
-
-    game:GetService("Players").PlayerAdded:Connect(addPlayer)
-    game:GetService("Players").PlayerRemoving:Connect(removePlayer)
-
-    whitelist_toggle_btn.MouseButton1Click:Connect(function()
-        if selected_player_name then
-            cfg.callback(selected_player_name, "WhitelistToggle")
-        end
-    end)
-
-    return setmetatable(cfg, library)
-end
-
 
             function library:init_config(window) 
                 local textbox;
