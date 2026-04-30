@@ -222,14 +222,14 @@
                 Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/tahoma_bold.ttf"),
             })
 
-            local TahomaBitmap = Register_Font("TahomaBitmap", 200, "normal", {
-                Id = "TahomaBitmap.ttf",
-                Font = game:HttpGet("https://github.com/iikla/husenhook/raw/refs/heads/main/fs-tahoma-8px.ttf")
+            local ProggyClean = Register_Font("ProggyClean", 200, "normal", {
+                Id = "ProggyClean.ttf",
+                Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf")
             })
             
             fonts = {
                 ["TahomaBold"] = Font.new(ProggyTiny, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
-                ["TahomaBitmap"] = Font.new(TahomaBitmap, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+                ["ProggyClean"] = Font.new(ProggyClean, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
             }
         end
     --
@@ -566,7 +566,7 @@
                 });
                 
                 local ui_title = library:create("TextLabel", {
-                    FontFace = fonts["TahomaBitmap"];
+                    FontFace = fonts["TahomaBold"];
                     TextColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     Text = cfg.name;
@@ -625,7 +625,7 @@
             -- Instances 
                 -- Tab Button
                     local tab_button = library:create("TextButton", {
-                        FontFace = fonts["TahomaBitmap"];
+                        FontFace = fonts["ProggyClean"];
                         TextColor3 = rgb(170, 170, 170);
                         BorderColor3 = rgb(0, 0, 0);
                         Text = cfg.name;
@@ -768,7 +768,7 @@
                 });
 
                 library:create("TextLabel", {
-                    FontFace = fonts["TahomaBitmap"];
+                    FontFace = fonts["ProggyClean"];
                     TextColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     Text = cfg.name;
@@ -849,7 +849,7 @@
                 });
 
                 local text_title = library:create("TextLabel", {
-                    FontFace = fonts["TahomaBitmap"];
+                    FontFace = fonts["ProggyClean"];
                     TextColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     Text = cfg.name;
@@ -982,7 +982,7 @@
                 });
                 
                 local title = library:create("TextLabel", {
-                    FontFace = fonts["TahomaBitmap"];
+                    FontFace = fonts["TahomaBold"];
                     TextColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     Text = cfg.name;
@@ -1035,7 +1035,7 @@
                         });
                         
                         library:create("TextLabel", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -1210,7 +1210,7 @@
                 -- Functions
                     function cfg.render_option(text) 
                         local text = library:create("TextButton", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             TextColor3 = rgb(170, 170, 170);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = text;
@@ -1310,7 +1310,7 @@
                     });
                     
                     local eeeee = library:create("TextLabel", {
-                        FontFace = fonts["TahomaBitmap"];
+                        FontFace = fonts["ProggyClean"];
                         TextColor3 = rgb(255, 255, 255);
                         RichText = true;
                         BorderColor3 = rgb(0, 0, 0);
@@ -1467,7 +1467,7 @@
                         });
                         
                         local text = library:create("TextLabel", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -1482,7 +1482,7 @@
                         });
                         
                         local title = library:create("TextLabel", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -1544,7 +1544,7 @@
                 -- Functions
                     function cfg.render_option(text) 
                         local title = library:create("TextButton", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             AutoButtonColor = false;
                             TextColor3 = rgb(170, 170, 170);
                             BorderColor3 = rgb(0, 0, 0);
@@ -1703,7 +1703,7 @@
                         
                         if not is_inline then
                             library:create("TextLabel", {
-                                FontFace = fonts["TahomaBitmap"];
+                                FontFace = fonts["ProggyClean"];
                                 TextColor3 = rgb(255, 255, 255);
                                 BorderColor3 = rgb(0, 0, 0);
                                 Text = cfg.name;
@@ -1769,7 +1769,7 @@
                         }); library:apply_theme(textbox_holder, tostring(self.count), "BackgroundColor3")
                         
                         local textbox = library:create("TextBox", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = "";
@@ -1795,7 +1795,7 @@
                         }); library:apply_theme(hex_textbox_holder, tostring(self.count), "BackgroundColor3")
                         
                         local hex_textbox = library:create("TextBox", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = "";
@@ -2272,7 +2272,7 @@
                     local input = library:create("TextBox", {
                         Parent = frame,
                         Name = "",
-                        FontFace = fonts["TahomaBitmap"],
+                        FontFace = fonts["ProggyClean"],
                         TextTruncate = Enum.TextTruncate.AtEnd,
                         TextSize = 12,
                         Text = "",
@@ -2365,7 +2365,7 @@
                         });
                         
                         local text = library:create("TextLabel", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -2380,7 +2380,7 @@
                         });
                         
                         local title = library:create("TextLabel", {
-                            FontFace = fonts["TahomaBitmap"];
+                            FontFace = fonts["ProggyClean"];
                             TextColor3 = rgb(255, 255, 255);
                             BorderColor3 = rgb(0, 0, 0);
                             Text = cfg.name;
@@ -2441,7 +2441,7 @@
                         
                         for _, v in options do
                             local option = library:create("TextButton", {
-                                FontFace = fonts["TahomaBitmap"];
+                                FontFace = fonts["ProggyClean"];
                                 TextColor3 = rgb(170, 170, 170);
                                 BorderColor3 = rgb(0, 0, 0);
                                 Text = v;
@@ -2642,7 +2642,7 @@
                     }); library:apply_theme(frame_inline, "inline", "BackgroundColor3")
                     
                     local text = library:create("TextLabel", {
-                        FontFace = fonts["TahomaBitmap"];
+                        FontFace = fonts["ProggyClean"];
                         TextColor3 = rgb(255, 255, 255);
                         BorderColor3 = rgb(0, 0, 0);
                         Text = cfg.name;
@@ -2690,21 +2690,21 @@
                     Size = dim2(1, 0, 0, 16), BorderSizePixel = 0
                 })
                 library:create("TextLabel", {
-                    Parent = header, FontFace = fonts["TahomaBitmap"],
+                    Parent = header, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(255,255,255), Text = "Name",
                     BackgroundTransparency = 1, Size = dim2(0.45, 0, 1, 0),
                     Position = dim2(0, 4, 0, 0),
                     TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
                 })
                 library:create("TextLabel", {
-                    Parent = header, FontFace = fonts["TahomaBitmap"],
+                    Parent = header, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(255,255,255), Text = "UserId",
                     BackgroundTransparency = 1, Size = dim2(0.3, 0, 1, 0),
                     Position = dim2(0.45, 0, 0, 0),
                     TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
                 })
                 library:create("TextLabel", {
-                    Parent = header, FontFace = fonts["TahomaBitmap"],
+                    Parent = header, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(255,255,255), Text = "Priority",
                     BackgroundTransparency = 1, Size = dim2(0.25, -4, 1, 0),
                     Position = dim2(0.75, 0, 0, 0),
@@ -2740,28 +2740,28 @@
 
                 local ix = 82
                 local lbl_name = library:create("TextLabel", {
-                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    Parent = info_card, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(255,255,255), Text = "Name: ???",
                     BackgroundTransparency = 1, Position = dim2(0, ix, 0, 10),
                     Size = dim2(0.5, -ix, 0, 14),
                     TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
                 })
                 local lbl_display = library:create("TextLabel", {
-                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
-                    TextColor3 = rgb(170,170,170), Text = "Display Name: ???",
+                    Parent = info_card, FontFace = fonts["ProggyClean"],
+                    TextColor3 = rgb(170,170,170), Text = "DisplayName: ???",
                     BackgroundTransparency = 1, Position = dim2(0, ix, 0, 26),
                     Size = dim2(0.5, -ix, 0, 14),
                     TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
                 })
                 local lbl_uid = library:create("TextLabel", {
-                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    Parent = info_card, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(170,170,170), Text = "UserId: ???",
                     BackgroundTransparency = 1, Position = dim2(0, ix, 0, 42),
                     Size = dim2(0.5, -ix, 0, 14),
                     TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
                 })
                 local lbl_level = library:create("TextLabel", {
-                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    Parent = info_card, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(170,170,170), Text = "Level: ???",
                     BackgroundTransparency = 1, Position = dim2(0, ix, 0, 58),
                     Size = dim2(0.5, -ix, 0, 14),
@@ -2770,7 +2770,7 @@
 
                 -- Priority dropdown
                 library:create("TextLabel", {
-                    Parent = info_card, FontFace = fonts["TahomaBitmap"],
+                    Parent = info_card, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(255,255,255), Text = "Priority",
                     BackgroundTransparency = 1, Position = dim2(0.55, 0, 0, 10),
                     Size = dim2(0.4, 0, 0, 14),
@@ -2784,7 +2784,7 @@
                 }) library:apply_theme(dd_btn, "inline", "BackgroundColor3")
 
                 local dd_text = library:create("TextLabel", {
-                    Parent = dd_btn, FontFace = fonts["TahomaBitmap"],
+                    Parent = dd_btn, FontFace = fonts["ProggyClean"],
                     TextColor3 = rgb(170,170,170), Text = "Neutral",
                     BackgroundTransparency = 1, Size = dim2(1, -4, 1, 0),
                     Position = dim2(0, 4, 0, 0),
@@ -2817,7 +2817,7 @@
                         BackgroundColor3 = rgb(30,30,30), BorderSizePixel = 0, ZIndex = 11
                     })
                     library:create("TextLabel", {
-                        Parent = ob, FontFace = fonts["TahomaBitmap"],
+                        Parent = ob, FontFace = fonts["ProggyClean"],
                         TextColor3 = pcolors[opt], Text = opt,
                         BackgroundTransparency = 1, Size = dim2(1, -4, 1, 0),
                         Position = dim2(0, 4, 0, 0),
@@ -2872,7 +2872,7 @@
                             if ok and img and selected_player_name == player.Name then avatar_image.Image = img end
                         end)
                         lbl_name.Text = "Name: " .. player.Name
-                        lbl_display.Text = "Display Name: " .. player.DisplayName
+                        lbl_display.Text = "DisplayName: " .. player.DisplayName
                         lbl_uid.Text = "UserId: " .. tostring(player.UserId)
                         local lvl = "???"
                         if player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Level") then
@@ -2888,7 +2888,7 @@
                     else
                         avatar_image.Image = ""
                         lbl_name.Text = "Name: ???"
-                        lbl_display.Text = "Display Name: ???"
+                        lbl_display.Text = "DisplayName: ???"
                         lbl_uid.Text = "UserId: ???"
                         lbl_level.Text = "Level: ???"
                         dd_text.Text = "Neutral"
@@ -2906,21 +2906,21 @@
                         Text = "", AutoButtonColor = false, BorderSizePixel = 0
                     })
                     local nl = library:create("TextLabel", {
-                        Parent = row, FontFace = fonts["TahomaBitmap"],
+                        Parent = row, FontFace = fonts["ProggyClean"],
                         TextColor3 = rgb(170,170,170), Text = player.Name,
                         BackgroundTransparency = 1, Size = dim2(0.45, 0, 1, 0),
                         Position = dim2(0, 4, 0, 0),
                         TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
                     })
                     library:create("TextLabel", {
-                        Parent = row, FontFace = fonts["TahomaBitmap"],
+                        Parent = row, FontFace = fonts["ProggyClean"],
                         TextColor3 = rgb(120,120,120), Text = tostring(player.UserId),
                         BackgroundTransparency = 1, Size = dim2(0.3, 0, 1, 0),
                         Position = dim2(0.45, 0, 0, 0),
                         TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12
                     })
                     local pl = library:create("TextLabel", {
-                        Parent = row, FontFace = fonts["TahomaBitmap"],
+                        Parent = row, FontFace = fonts["ProggyClean"],
                         TextColor3 = is_lp and rgb(0,100,255) or rgb(170,170,170),
                         Text = is_lp and "LocalPlayer" or "Neutral",
                         BackgroundTransparency = 1, Size = dim2(0.25, -4, 1, 0),
