@@ -3,24 +3,6 @@ local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
---// Load Custom Font
-local CustomFont
-local fontName = "TahomaBitmap.ttf"
-local fontURL = "https://github.com/re-all/Tahoma/raw/main/TahomaBitmap.ttf"
-
-if not isfile(fontName) then
-    local success, result = pcall(function() return game:HttpGet(fontURL) end)
-    if success and result then
-        writefile(fontName, result)
-    end
-end
-
-if isfile(fontName) then
-    CustomFont = Drawing.new("Font")
-    CustomFont.Data = readfile(fontName)
-    CustomFont.Name = "Tahoma"
-end
-
 local floor = math.floor
 local abs = math.abs
 local clamp = math.clamp
@@ -36,7 +18,7 @@ local ESP = {
         Enabled = false,
         MaxDistance = 1500,
         UseWhitelist = true,
-        TextFont = CustomFont or 2,
+        TextFont = 2,
         TextSize = 13,
 
         Enemy = {
